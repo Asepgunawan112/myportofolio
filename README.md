@@ -12,13 +12,13 @@ Kelas : PBP F
 
 ###
 
-----
+---
 
 AI disclosure
 
-1. di tugas 1 ini saya memakai gemini AI untuk membantu menjelaskan properti css lebih lanjut untuk kebutuhan saya setelah saya mencari syntax nya di w3school dan juga ringkasan google. Penggunaan ini sebagian besar digunakan pada proses perapihan grid.
+1. di tugas 1 ini saya memakai gemini AI untuk membantu menjelaskan properti css lebih lanjut untuk kebutuhan saya setelah saya mencari syntax nya di w3school dan juga ringkasan google. Penggunaan ini sebagian besar digunakan pada proses perapihan grid. Saya juga menggunakan AI untuk memberikan warna shadow yang pas di card education (ada pada warna rgb style.ss).
 2. Untuk card yang saya pakai di web, saya menggunakan template card dari bootstrap dan tailwind yang saya rewrite ke css, disini saya menggunakan bantuan AI untuk meminta saran syntax yang harus saya pakai ketika mendapati utility class yang saya bingung untuk di rewrite ke css biasa.
 3. Saya juga menanyakan saran untuk menggunakan logo tech-stack kepada Gemini dan akhirnya saya pakai dari web https://devicon.dev/ untuk web dari techstack nya <i>.
 4. Saya juga menanyakan pada AI elemen semantic apa yang tepat digunakan untuk section baru yang saya buat (<figure>).
 
-----
+---

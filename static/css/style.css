@@ -22,7 +22,7 @@ body {
 }
 
 h1,
-.brand {
+.brand .education {
   font-family:
     "Space Grotesk",
     -apple-system,
@@ -33,6 +33,7 @@ h1,
   max-width: 960px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  margin-top: 3rem;
 }
 
 .site-header {
@@ -52,6 +53,9 @@ h1,
   color: var(--ink);
   text-decoration: none;
 }
+.nav-tittle:hover {
+  transform: translateY(-2px);
+}
 
 .site-header nav {
   display: flex;
@@ -64,7 +68,7 @@ h1,
   font-size: 0.95rem;
 }
 .hero {
-  padding: 4.5rem 0 5rem;
+  padding: 4.5rem 0 1rem;
 }
 
 .hero-grid {
@@ -152,7 +156,6 @@ h1,
   cursor: pointer;
 }
 
-
 .hero-photo:hover .avatar {
   transform: translate(1.25rem, 1.25rem);
 }
@@ -183,29 +186,88 @@ h1,
   border: 3px solid var(--ink);
   transition: transform 0.25s ease;
 }
+/* 
+section baru */
+.education {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 250px));
+  justify-content: start;
+  gap: 1rem;
+  margin: 2rem auto;
+  margin-top: 5rem;
+}
+
+.education-tittle {
+  top: 4.5rem;
+  position: relative;
+}
+
+.education-tittle:hover {
+  color: var(--accent);
+  transition: color 0.2s ease-in-out;
+}
+
+.education-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.education-card:hover {
+  background-color: var(--accent);
+}
+
+.education-card img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 1;
+}
+
+.education-card figcaption {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+@media (max-width: 480px) {
+  .education {
+    grid-template-columns: 1fr;
+  }
+  .education-card {
+    flex-direction: row;
+  }
+}
+/* 
+pembatas */
 
 .site-footer {
-    padding: 1.5rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    border-top: 1px solid var(--line);
+  padding: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
 }
 
 @media (max-width: 600px) {
-    .hero-grid {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "identity"
-            "photo"
-            "details";
-    }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "identity"
+      "photo"
+      "details";
+  }
 
-    .hero-photo {
-        max-width: 220px;
-    }
+  .hero-photo {
+    max-width: 220px;
+  }
 
-    .social-links {
-        justify-content: flex-start;
-    }
+  .social-links {
+    justify-content: flex-start;
+  }
 }
-

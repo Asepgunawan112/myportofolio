@@ -68,7 +68,7 @@ h1,
   font-size: 0.95rem;
 }
 .hero {
-  padding: 4.5rem 0 1rem;
+  padding: 4.5rem 0 0.5rem;
 }
 
 .hero-grid {
@@ -236,13 +236,29 @@ section baru */
   color: #1f2937;
 }
 
-@media (max-width: 480px) {
-  .education {
-    grid-template-columns: 1fr;
-  }
-  .education-card {
-    flex-direction: row;
-  }
+.edu-and-tools {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 3rem;
+  margin-top: 4rem;
+}
+
+.tools-tittle {
+  top: 4.6rem;
+  margin-left: 1.4rem;
+  position: relative;
+  border-bottom: 2px solid var(--accent);
+}
+
+.tools-tittle:hover {
+  color: var(--accent);
+  transition: color 0.2s ease-in-out;
+}
+.tools-grid {
+  gap: 1rem;
+  margin: 5rem auto;
+  margin-left: 1.4rem;
+  line-height: 1.5;
 }
 /* 
 pembatas */
@@ -269,5 +285,31 @@ pembatas */
 
   .social-links {
     justify-content: flex-start;
+  }
+  .edu-and-tools {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .tools-grid i {
+    font-size: 2rem;
+  }
+
+  .education {
+    grid-template-columns: 1fr;
+  }
+  .education-card {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    font-size: 0.5rem;
+  }
+
+  .education-card img {
+    margin-bottom: 0.5rem;
+    width: 100px;
+    height: 100px;
   }
 }

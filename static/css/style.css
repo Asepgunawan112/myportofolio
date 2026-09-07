@@ -269,8 +269,16 @@ pembatas */
   font-size: 0.85rem;
   border-top: 1px solid var(--line);
 }
-
-@media (max-width: 600px) {
+@media (max-width: 780px) {
+  .education-card {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    font-size: 1rem;
+  }
+}
+@media (max-width: 570px) {
   .hero-grid {
     grid-template-columns: 1fr;
     grid-template-areas:

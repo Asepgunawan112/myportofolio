@@ -20,9 +20,12 @@
   <body>
     <header class="site-header">
       <div class="container">
-        <a href="#profile" class="brand">Ayyasi</a>
+        <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
         <nav>
-          <a href="#profile" class="nav-tittle">Profile</a>
+          <a href="{% url 'main:show_main' %}" class="nav-tittle">Profile</a>
+          <a href="{% url 'main:show_experience' %}" class="nav-tittle"
+            >Experience</a
+          >
         </nav>
       </div>
     </header>
@@ -34,7 +37,7 @@
             <p class="hero-kicker">
               Computer Science &middot; Universitas Indonesia
             </p>
-            <h1>Ayyasi</h1>
+            <h1 class="#">{{ name }}</h1>
           </div>
           <div class="hero-photo">
             <div class="photo-block"></div>
@@ -42,24 +45,20 @@
               <img
                 class="avatar"
                 src="/static/img/ayyas.png"
-                alt="Photo of Ayyasi"
+                alt="Photo of {{name}}"
               />
             </a>
           </div>
           <div class="hero-details">
-            <p class="bio" style="text-align: left">
-              2nd-year Computer Science student at Universitas Indonesia.
-              Interested in web development and currently still learning more. I
-              am <strong>Sundanese</strong>.
-            </p>
+            <p class="bio" style="text-align: left">{{ bio }}</p>
             <dl class="meta-list">
               <div class="meta-row">
                 <dt>NPM</dt>
-                <dd>2506550482</dd>
+                <dd>{{ npm }}</dd>
               </div>
               <div class="meta-row">
                 <dt>Program</dt>
-                <dd>S1 Ilmu Komputer</dd>
+                <dd>{{ study_program }}</dd>
               </div>
             </dl>
             <div class="social-links">
@@ -162,7 +161,7 @@
     <footer class="site-footer">
       <div class="container">
         <p>
-          &copy; 2026 Ayyasi. Fakultas Ilmu Komputer, Universitas Indonesia.
+          &copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.
         </p>
       </div>
     </footer>

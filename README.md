@@ -2,7 +2,20 @@ Nama : Ayyasi
 
 NPM : 2506550482
 
-Kelas : PBP F
+## Kelas : PBP F
+
+---
+
+# Instruksi Setup
+
+1. clone repo ---> `git clone <REPO_URL>`
+2. setup venv python ----> `python -m venv env` lalu jalankan `env\Scripts\activate` untuk mengaktifkan venv
+3. install dependensi ----> `pip install -r requirements.txt`
+4. Jalankan migrasi ----> `python manage.py makemigrations` lalu `python manage.py migrate`
+5. Jalankan unit test----> `python manage.py test main`
+6. Jalankan server lokal----> `python manage.py runserver`
+
+---
 
 ### Tugas 1
 
@@ -41,3 +54,13 @@ AI disclosure
     organization= models.CharField(max_length=255)
    ````
    makemigration & migrate lagi untuk update perubahan schema models.
+
+---
+
+# AI Disclosure
+
+1. Saya memakai Gemini AI Flash untuk meminta saran cara memasukkan img.png kedalam template atau lebih tepatnya bagaimana membuat field yang nantinya bisa menerima file gambar.
+2. Untuk task lainnya saya memakai instruksi yang berasal dari tutorial sebelumnya untuk penambahan endpoint dan template dari uiverse.io untuk card.
+
+---
+gi

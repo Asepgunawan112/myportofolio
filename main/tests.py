@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Certificate
 
 
 class MainTest(TestCase):
@@ -12,6 +12,12 @@ class MainTest(TestCase):
             description="Membantu mahasiswa memahami pengembangan web.",
             category="part-time",
         )
+        self.certificate = Certificate.objects.create(
+            title="Sertifikat React",
+            organization="WPU Course",
+            date="2026-06-20",
+            thumbnail="React_sertif.png",
+        )   
 
     def test_main_url_is_accessible(self):
         response = self.client.get(reverse("main:show_main"))
@@ -56,3 +62,25 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Selesai")
         self.assertNotContains(response, "Sedang berlangsung")
+
+        # test certificate model
+
+    def test_certificate_page_accessible(self):
+        response = self.client.get(reverse("main:show_certificate"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "certificate.html")
+        self.assertContains(response, f'href="{reverse("main:show_main")}"')
+
+    def test_certificate_data_displayed_when_data_added(self):
+        response = self.client.get(reverse("main:show_certificate"))
+
+        self.assertContains(response, self.certificate.title)
+        self.assertContains(response, self.certificate.organization)
+        self.assertContains(response, self.certificate.thumbnail)
+
+    def test_empty_certificate_page(self):
+        Certificate.objects.all().delete()
+        response = self.client.get(reverse("main:show_certificate"))
+
+        self.assertContains(response, "there are no certificates to display.")

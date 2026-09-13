@@ -22,3 +22,22 @@ AI disclosure
 4. Saya juga menanyakan pada AI elemen semantic apa yang tepat digunakan untuk section baru yang saya buat (<figure>).
 
 ---
+
+### Tugas 2
+
+1. Pada saat pengguna membuka link/url dari website, browser akan mengirim HTTP request yang akan diteruskan eke urls.py yang ada di folder portofolio/root, jika request yang dikirimkan memiliki route '' maka request akan diteruskan ke main.urls (urls.py pada folder main). Setelah sampai di urls.py di main, disini akan mencocokan request yang dikirim dengan path yang tersedia. Setelah keduanya cocok, maka django akan melanjutkan ke fungsi view yang bersangkutan dan mengeksekusi kodenya. Pada tahap tersebut, django akan merender request, template, dan context. Pada tahap ini, view memanggil model yang ada di models.py untuk mengambil data dari database lalu menyusun nya di dalam context. Lalu pada template, django mengembalikan response berupa tampilan template.html yang dapat dilihat dengan rapi oleh pengguna, lengkap dengan isi data yang berasal dari context.
+2. Ada beberapa keuntungan diantaranya:
+   -Kemudahan dalam mengelola data, jika data ada banyak kita tidak perlu mengetik satu-satu data yang kita punya di dalam html. Dengan models yang sudah kita miliki kita bisa memasukkan data-data secara perlahan ke database lalu untuk menampilkan data-data tersebut, kita cukup mengiterasikan data nya di html dengan berbagai metode iterasi yang tersedia sehingga kita dapat memangkas penegmbalian data di tampilan cukup dengan satu baris kode saja (dont repeat yourself). Dengan metode ini juga kita jadi lebih mudah untuk melakukan proses CRUD. Karena perlakuan ini pun, kita menjadi lebih mudah untuk mengatur style dari tampilan data karena tidak perlu mengelola baris kode data yang banyak di file html. Metode ini juga merupakan best-practice dalam pembuatan API karena data yang tersimpan di database bisa menjadi lebih dinamis karena format yang kita gunakan bisa diubah menjadi json atau xml untuk kebutuhan dalam pembuatan API.
+
+3. makemigration --> tracking perubahan schema/field di models
+   migrate --> eksekusi perubahan schem/field di database
+   contoh:
+   ````id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title= models.CharField(max_length=255)```
+    makemigration & migrate untuk memasukan models ke database
+    edit:
+    ```id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title= models.CharField(max_length=255)
+    organization= models.CharField(max_length=255)
+   ````
+   makemigration & migrate lagi untuk update perubahan schema models.

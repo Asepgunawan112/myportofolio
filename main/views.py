@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from main.models import Experience
+from main.models import Experience, Certificate
 
 # Create your views here.
 def show_main(request):
@@ -22,3 +22,11 @@ def show_experience(request):
         "experience_list": Experience.objects.all(),
     }
     return render(request, "experience.html", context)
+
+def show_certificate(request):
+    context = {
+        "name": "Ayyasi",
+        "certificate_list": Certificate.objects.all(),
+    }
+    return render(request, "certificate.html", context)
+    

@@ -1,70 +1,92 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Burhan - Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
-    />
-    <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <main>
-    <header class="site-header">
-      <div class="container">
-        <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-        <nav>
-          <a href="{% url 'main:show_main' %}" class="nav-tittle">Profile</a>
-          <a href="{% url 'main:show_experience' %}" class="nav-tittle"
-            >Experience</a
-          >
-          <a href="{% url 'main:show_certificate' %}" class="nav-tittle"
-            >Certificates</a
-          >
-        </nav>
-      </div>
-    </header>
-    <section class="experience-section" id="experience">
-      <div class="container">
-        <p class="section-kicker">My Certificates</p>
+{% extends "base.html" %} {% block meta %}
+<title>Certificates - {{ name }}</title>
+{% endblock meta %} {% block content %}
+<main>
+  <section class="experience-section" id="experience">
+    <div class="container">
+      <p class="section-kicker">My Certificates</p>
+      <div class="certificate-header">
         <h1>Certificates</h1>
-
-        <div class="certificate-grid">
-          {% for certificate in certificate_list %}
-          <div class="flip-card">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <p class="title">{{ certificate.title }}</p>
-                <p>{{ certificate.organization }}</p>
-                <p id="certificate-date">{{certificate.date}}</p>
-              </div>
-              {% load static %}
-              <div
-                class="flip-card-back"
-                style="background-image: url('{% get_static_prefix %}img/certificate/{{ certificate.thumbnail }}'); background-size: cover; background-position: center;"
-              ></div>
+        <a
+          href="{% url 'main:create_certificate' %}"
+          class="button certificate-add-button"
+        >
+          <span aria-hidden="true">+</span>
+          Tambah Sertifikat
+        </a>
+      </div>
+      <form
+        method="get"
+        action="{% url 'main:show_certificate' %}"
+        class="certificate-search"
+      >
+        <input
+          type="search"
+          name="title"
+          value="{{ title_query }}"
+          placeholder="Cari berdasarkan nama sertifikat"
+          class="certificate-search__input"
+          aria-label="Cari berdasarkan nama sertifikat"
+        />
+        <button type="submit" class="button" id="cari-button">Cari</button>
+      </form>
+      {% load static %}
+      <div class="certificate-grid">
+        {% for certificate in certificate_list %}
+        <div class="flip-card">
+          {% if project.certificate_image_url %}
+          <img
+            src="{{ certificate.project_image_url }}"
+            alt="Gambar {{ certificate.title }}"
+            class="certificate-image"
+          />
+          {% endif %}
+          <h2>{{ project.title }}</h2>
+          <span class="experience-category">{{ project.tech_stack }}</span>
+          <p class="experience-description">{{ project.description }}</p>
+          <div class="certificate-card-actions">
+            <div class="certificate-actions">
+              {% if project.project_url %}
+              <a href="{{ certificate.certificate_url }}" class="button"
+                >Lihat certificate</a
+              >
+              {% endif %}
             </div>
           </div>
-          {% empty %}
-          <p class="empty-state">there are no certificates to display.</p>
-          {% endfor %}
+          <form
+            method="post"
+            action="{% url 'main:delete_certificate' certificate.id %}"
+            class="certificate-delete-form"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="certificate-delete-button"
+              aria-label="Hapus sertifikat {{ certificate.title }}"
+              onclick="return confirm('Yakin ingin menghapus sertifikat ini?');"
+            >
+              &times;
+            </button>
+          </form>
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <p class="title">{{ certificate.title }}</p>
+              <p>{{ certificate.organization }}</p>
+              <p id="certificate-date">{{ certificate.date }}</p>
+            </div>
+            <div
+              class="flip-card-back"
+              style="background-image: url('{% get_static_prefix %}img/certificate/{{ certificate.thumbnail }}'); background-size: cover; background-position: center;"
+            ></div>
+          </div>
         </div>
+        {% empty %} {% if title_query %}
+        <p class="empty-state">Tidak ada sertifikat dengan nama tersebut.</p>
+        {% else %}
+        <p class="empty-state">there are no certificates to display.</p>
+        {% endif %} {% endfor %}
       </div>
-    </section>
-  </main>
-  <footer class="site-footer">
-    <div class="container">
-      <p>
-        &copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.
-      </p>
     </div>
-  </footer>
-</html>
+  </section>
+</main>
+{% endblock content %}

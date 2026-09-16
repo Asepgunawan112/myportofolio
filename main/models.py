@@ -31,7 +31,7 @@ class Certificate(models.Model):
     title= models.CharField(max_length=255)
     organization= models.CharField(max_length=255, blank=True)
     date= models.DateField(blank=True)
-    thumbnail = models.CharField(max_length=255,blank=True, null=True)
+    thumbnail = models.URLField(blank=True, max_length=500)
 
     def __str__(self):
         return self.title

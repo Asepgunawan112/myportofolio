@@ -1,0 +1,43 @@
+<p class="experience-status">
+    <button type="button"
+            class="button button-danger"
+            popovertarget="delete-book-{{ book.id }}"
+            aria-label="Hapus {{ book.title }}"
+            title="Hapus buku">
+        Hapus Buku
+    </button>
+</p>
+<div id="delete-book-{{ book.id }}"
+     class="book-delete-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="delete-book-title-{{ book.id }}">
+    <button type="button"
+            class="book-delete-modal__backdrop"
+            popovertarget="delete-book-{{ book.id }}"
+            popovertargetaction="hide"
+            aria-label="Tutup konfirmasi hapus"></button>
+    <div class="book-delete-modal__content">
+        <button type="button"
+                class="book-delete-modal__close"
+                popovertarget="delete-book-{{ book.id }}"
+                popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus">×</button>
+        <h2 id="delete-book-title-{{ book.id }}">Hapus Buku?</h2>
+        <p>
+            Apakah Anda yakin ingin menghapus
+            <strong>{{ book.title }}</strong>?
+        </p>
+        <div class="book-delete-modal__actions">
+            <button type="button"
+                    class="button button-secondary"
+                    popovertarget="delete-book-{{ book.id }}"
+                    popovertargetaction="hide">Batal</button>
+            <form method="post" action="{% url 'main:delete_book' book.id %}">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>

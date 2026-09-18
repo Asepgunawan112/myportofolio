@@ -62,4 +62,5 @@ AI disclosure
 1. Saya memakai Gemini AI Flash untuk meminta saran cara memasukkan img.png kedalam template atau lebih tepatnya bagaimana membuat field yang nantinya bisa menerima file gambar.
 2. Untuk task lainnya saya memakai instruksi yang berasal dari tutorial sebelumnya untuk penambahan endpoint dan template dari uiverse.io untuk card.
 
----
+----
+

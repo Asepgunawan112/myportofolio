@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block meta %}
+    <title>Add Book - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+    <main>
+        <section class="experience-section">
+            <div class="container">
+                <h1>Add New Book</h1>
+                <form method="post"
+                      action="{% url 'main:create_book' %}"
+                      class="book-form">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <p class="form-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="button">Tambah Book</button>
+                    <a href="{% url 'main:show_book' %}" class="button button-secondary">Batal</a>
+                </form>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from main.models import Experience, Certificate
+from main.models import Experience, Certificate, Book
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from main.form import CertificateForm
+from main.form import CertificateForm, BookForm
 
 # Create your views here.
 def show_main(request):
@@ -75,4 +75,51 @@ def delete_certificate(request, certificate_id):
         return redirect("main:show_certificate")
 
     return redirect("main:show_certificate")
+
+def show_book(request):
+    title_query = request.GET.get("title", "").strip()
+    book_list = Book.objects.all()
+    if title_query:
+        book_list = book_list.filter(title__icontains=title_query)
+
+    context = {
+        "name": "Ayyasi",
+        "book_list": book_list,
+        "title_query": title_query,
+    }
+    return render(request, "book.html", context)
+
+def create_book(request):
+    form = BookForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Buku baru berhasil ditambahkan!")
+        return redirect("main:show_book")
+
+    context = {
+        "name": "Burhan",
+        "form": form,
+    }
+    return render(request, "book_form.html", context)
+
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+
+    if request.method == "POST":
+        book.delete()
+        messages.success(request, "Book berhasil dihapus!")
+        return redirect("main:show_book")
+
+    return redirect("main:show_book")
+
+def get_book_json (request):
+    title_query = request.GET.get("title", "").strip()
+    book = Book.objects.all()
+
+    if title_query:
+        book = book.filter(title__icontains=title_query)
+
+    book_json = serializers.serialize("json", book)
+    return HttpResponse(book_json, content_type="application/json")
     

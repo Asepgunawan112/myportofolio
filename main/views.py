@@ -122,4 +122,19 @@ def get_book_json (request):
 
     book_json = serializers.serialize("json", book)
     return HttpResponse(book_json, content_type="application/json")
+
+def edit_book_data(request, book_id):
+    book= Book.objects.get(id=book_id)
+    form = BookForm(request.POST or None, instance=book)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Book berhasil diupdate!")
+        return redirect("main:show_book")
+    context = {
+        "name": "Burhan",
+        "form": form,
+        "book": book,
+    }
+    return render(request, 'components/edit_book.html',context)
+    
     

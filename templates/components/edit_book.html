@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>Add Book - {{ name }}</title>
+    <title>Edit Book - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
         <section class="experience-section">
             <div class="container">
-                <h1>Add New Book</h1>
+                <h1>Edit Book</h1>
                 <form method="post"
-                      action="{% url 'main:create_book' %}"
+                      action="{% url 'main:edit_book_data' book.id %}"
                       class="book-form">
                     {% csrf_token %}
                     {% for field in form %}
@@ -20,8 +20,8 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button">Add Book</button>
-                    <a href="{% url 'main:show_book' %}" class="button button-secondary">Cancel</a>
+                    <button type="submit" class="button">Edit Book</button>
+                    <a href="{% url 'main:show_book' %}" class="button button-secondary">Batal</a>
                 </form>
             </div>
         </section>

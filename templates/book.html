@@ -30,9 +30,9 @@
                     {% for book in book_list %}
                         <article class="experience-card">
                             {% if book.thumbnail %}
-                                <img src="{{ book.thumbnail }}"
-                                     alt="Gambar {{ book.title }}"
-                                     class="book-image">
+                            <img src="{{ book.thumbnail }}"
+                                 alt="Gambar {{ book.title }}"
+                                 class="book-image">    
                             {% endif %}
                             <h2>{{ book.title }}</h2>
                             <span class="experience-category">{{ book.author }}</span>
@@ -41,6 +41,8 @@
                             <div class="book-card-actions">
                                 <div class="book-actions">
                                     {% include "components/book_delete_modal.html" with book=book %}
+                                    <a href="{% url 'main:edit_book_data' book.id %}"
+                                    class="button button-secondary">Edit</a>
                                 </div>
                             </div>
                         </article>

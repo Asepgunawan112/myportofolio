@@ -395,7 +395,8 @@ pembatas */
   margin: 0;
 }
 
-   .flip-card:hover .certificate-delete-button {
+   .flip-card:hover .certificate-delete-button,
+   .flip-card:hover .certificate-edit-button {
   opacity: 1;
   transform: scale(1);
 }
@@ -404,7 +405,13 @@ pembatas */
   background-color: rgba(220, 53, 69, 0.85);
 }
 
-.certificate-delete-button:focus-visible {
+.certificate-edit-button:hover {
+  background-color: #2563eb;
+  color: white;
+}
+
+.certificate-delete-button:focus-visible,
+.certificate-edit-button:focus-visible {
   opacity: 1;
   transform: scale(1);
   outline: 2px solid coral;
@@ -419,6 +426,27 @@ pembatas */
   color: white;
   font-size: 1.1rem;
   line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
+}
+
+.certificate-edit-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.45);
+  color: white;
+  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;

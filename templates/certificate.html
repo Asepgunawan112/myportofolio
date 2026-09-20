@@ -53,21 +53,14 @@
               {% endif %}
             </div>
           </div>
-          <form
-            method="post"
-            action="{% url 'main:delete_certificate' certificate.id %}"
-            class="certificate-delete-form"
+          <a
+            href="{% url 'main:edit_certificate_data' certificate.id %}"
+            class="certificate-edit-button"
+            aria-label="Edit sertifikat {{ certificate.title }}"
+            title="Edit sertifikat"
           >
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="certificate-delete-button"
-              aria-label="Hapus sertifikat {{ certificate.title }}"
-              onclick="return confirm('Yakin ingin menghapus sertifikat ini?');"
-            >
-              &times;
-            </button>
-          </form>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+          </a>
           <div class="flip-card-inner">
             <div class="flip-card-front">
               <p class="title">{{ certificate.title }}</p>

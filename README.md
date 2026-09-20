@@ -63,4 +63,6 @@ AI disclosure
 2. Untuk task lainnya saya memakai instruksi yang berasal dari tutorial sebelumnya untuk penambahan endpoint dan template dari uiverse.io untuk card.
 
 ----
+# Tugas 3
+
 

@@ -1,6 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput, DateInput, NumberInput
+from django.forms import ModelForm, TextInput, Textarea, URLInput, DateInput, NumberInput, Select
 
-from main.models import Certificate, Book
+from main.models import Certificate, Book, Experience
 
 class CertificateForm(ModelForm):
     class Meta:
@@ -92,6 +92,52 @@ class BookForm(ModelForm):
             "thumbnail": URLInput(
                 attrs={
                     "placeholder": "https://drive.google.com/thumbnail?id=...&sz=w1000",
+                }
+            ),
+            "status": Select(
+                attrs={
+                    'placeholder': 'Status buku',
+                }
+            ),
+        }
+
+
+
+class ExperienceForm(ModelForm):
+    class Meta:
+        model = Experience
+        fields =[
+            "title",
+            "description",
+            "category",
+            "started_at",
+            "ended_at",
+        ]
+        widgets = {
+            "title": TextInput(
+                attrs={
+                    "placeholder": "Judul pengalaman",
+                }
+            ),
+            "description": Textarea(
+                attrs={
+                    "placeholder": "Deskripsi pengalaman",
+                    "rows": 4,
+                }
+            ),
+            "category": Select(
+                attrs={
+                    "placeholder": "Kategori pengalaman",
+                }
+            ),
+            "started_at": DateInput(
+                attrs={
+                    'type': 'date'
+                }
+            ),
+            "ended_at": DateInput(
+                attrs={
+                    'type': 'date'
                 }
             ),
         }

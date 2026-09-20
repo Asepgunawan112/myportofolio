@@ -63,7 +63,29 @@ class MainTest(TestCase):
         self.assertContains(response, "Selesai")
         self.assertNotContains(response, "Sedang berlangsung")
 
-        # test certificate model
+    def test_experience_page_has_edit_and_delete_buttons(self):
+        response = self.client.get(reverse("main:show_experience"))
+
+        self.assertEqual(response.status_code, 200)
+        edit_url = reverse("main:edit_experience_data", args=[self.experience.id])
+        delete_url = reverse("main:delete_experience", args=[self.experience.id])
+        self.assertContains(response, f'href="{edit_url}"')
+        self.assertContains(response, f'action="{delete_url}"')
+        self.assertContains(response, f'delete-experience-{self.experience.id}')
+
+    def test_edit_experience_page_accessible(self):
+        response = self.client.get(reverse("main:edit_experience_data", args=[self.experience.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "components/edit_experience.html")
+        self.assertContains(response, self.experience.title)
+
+    def test_delete_experience(self):
+        response = self.client.post(reverse("main:delete_experience", args=[self.experience.id]))
+
+        self.assertRedirects(response, reverse("main:show_experience"))
+        self.assertFalse(Experience.objects.filter(id=self.experience.id).exists())
+
 
     def test_certificate_page_accessible(self):
         response = self.client.get(reverse("main:show_certificate"))
@@ -84,3 +106,26 @@ class MainTest(TestCase):
         response = self.client.get(reverse("main:show_certificate"))
 
         self.assertContains(response, "there are no certificates to display.")
+
+    def test_certificate_page_has_edit_button(self):
+        response = self.client.get(reverse("main:show_certificate"))
+
+        self.assertEqual(response.status_code, 200)
+        edit_url = reverse("main:edit_certificate_data", args=[self.certificate.id])
+        self.assertContains(response, f'href="{edit_url}"')
+
+    def test_edit_certificate_page_accessible_and_contains_delete_modal(self):
+        response = self.client.get(reverse("main:edit_certificate_data", args=[self.certificate.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "components/edit_certificate.html")
+        self.assertContains(response, self.certificate.title)
+        delete_url = reverse("main:delete_certificate", args=[self.certificate.id])
+        self.assertContains(response, f'action="{delete_url}"')
+        self.assertContains(response, f'delete-certificate-{self.certificate.id}')
+
+    def test_delete_certificate(self):
+        response = self.client.post(reverse("main:delete_certificate", args=[self.certificate.id]))
+
+        self.assertRedirects(response, reverse("main:show_certificate"))
+        self.assertFalse(Certificate.objects.filter(id=self.certificate.id).exists())

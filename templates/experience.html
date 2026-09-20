@@ -1,33 +1,49 @@
-<!doctype html>
-<html lang="en">
-  {%extends 'base.html' %} {% block content %}
-  <main>
+{% extends "base.html" %}
+{% block meta %}
+    <title>Experience - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+<main>
     <section class="experience-section" id="experience">
-      <div class="container">
-        <p class="section-kicker">Perjalanan saya sejauh ini</p>
-        <h1>Experience</h1>
+        <div class="container">
+            <p class="section-kicker">Perjalanan saya sejauh ini</p>
+            <h1>Experience</h1>
+            <a href="{% url 'main:create_experience' %}"
+               class="button book-add-button">
+                <span aria-hidden="true">+</span>
+                Tambah Pengalaman
+            </a>
+            <p class="section-description">
+                Berikut adalah pengalaman saya sejauh ini.
+            </p>
+            <div class="experience-grid">
+                {% for experience in experience_list %}
+                    <article class="experience-card">
+                        <span class="experience-category">
+                            {{ experience.get_category_display }}
+                        </span>
+                        <h2>{{ experience.title }}</h2>
+                        <p class="experience-description">{{ experience.description }}</p>
 
-        <div class="experience-grid">
-          {% for experience in experience_list %}
-          <article class="experience-card">
-            <span class="experience-category">
-              {{ experience.get_category_display }}
-            </span>
-            <h2>{{ experience.title }}</h2>
-            <p class="experience-description">{{ experience.description }}</p>
+                        {% if experience.is_ongoing %}
+                            <p class="experience-status">Sedang berlangsung</p>
+                        {% else %}
+                            <p class="experience-status">Selesai</p>
+                        {% endif %}
 
-            {% if experience.is_ongoing %}
-            <p class="experience-status">Sedang berlangsung</p>
-            {% else %}
-            <p class="experience-status">Selesai</p>
-            {% endif %}
-          </article>
-          {% empty %}
-          <p class="empty-state">Belum ada pengalaman yang ditambahkan.</p>
-          {% endfor %}
+                        <div class="book-card-actions">
+                            <div class="book-actions">
+                                {% include "components/experience_delete_modal.html" with experience=experience %}
+                                <a href="{% url 'main:edit_experience_data' experience.id %}"
+                                   class="button button-secondary">Edit</a>
+                            </div>
+                        </div>
+                    </article>
+                {% empty %}
+                    <p class="empty-state">Belum ada pengalaman yang ditambahkan.</p>
+                {% endfor %}
+            </div>
         </div>
-      </div>
     </section>
-  </main>
-  {% endblock content %}
-</html>
+</main>
+{% endblock content %}

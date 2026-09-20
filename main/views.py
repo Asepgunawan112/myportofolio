@@ -4,10 +4,10 @@ from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from main.form import CertificateForm, BookForm
+from main.form import CertificateForm, BookForm, ExperienceForm
 
-# Create your views here.
-def show_main(request):
+
+def show_main(request): #fungsi halaman utama
     context = {
         "name": "Ayyasi",
         "npm": "2506550482",
@@ -21,26 +21,74 @@ def show_main(request):
     return render(request, "index.html", context)
 
 
-def show_experience(request):
+def show_experience(request): #fungsi halaman utama pengalaman
     context = {
         "name": "Ayyasi",
         "experience_list": Experience.objects.all(),
     }
     return render(request, "experience.html", context)
 
-def show_certificate(request):
-    json_response = get_certificate_json(request)
-    certificate = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    certificate= [certificate.object for certificate in certificate]
-    title_query = request.GET.get("title", "").strip()
+def edit_experience_data(request, experience_id): #fungsi edit data pengalaman
+    experience = Experience.objects.get(id=experience_id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience berhasil diupdate!")
+        return redirect("main:show_experience")
+    context = {
+        "name": "Burhan",
+        "form": form,
+        "experience": experience,
+    }
+    return render(request, 'components/edit_experience.html',context)
+
+def create_experience(request): #fungsi tambah pengalaman
+    form = ExperienceForm(request.POST or None)
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        experience = Experience(title=title, description=description)
+        experience.save()
+        messages.success(request, "Pengalaman baru berhasil ditambahkan!")
+        return redirect("main:show_experience")
+    
 
     context = {
+        "name": "Burhan",
+        "form" : form,
+    }
+    return render(request, "experience_form.html", context)
+
+
+def get_experience_json(request): #fungsi ambil data pengalaman
+    experience = Experience.objects.all()
+    experience_json = serializers.serialize("json", experience)
+    return HttpResponse(experience_json, content_type="application/json")
+
+def delete_experience(request, experience_id): #fungsi hapus data pengalaman
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Pengalaman berhasil dihapus!")
+        return redirect("main:show_experience")
+
+    return redirect("main:show_experience")
+
+def show_certificate(request): #fungsi halaman utama sertifikat
+    title_query = request.GET.get("title", "").strip()
+    certificate_list = Certificate.objects.all()
+    
+    if title_query:
+        certificate_list = certificate_list.filter(title__icontains=title_query)
+    context = {
         "name": "Ayyasi",
-        "certificate_list": Certificate.objects.all(),
+        "certificate_list": certificate_list,
+        "title_query": title_query,
     }
     return render(request, "certificate.html", context)
 
-def create_certificate(request):
+def create_certificate(request): #fungsi tambah sertifikat
     form = CertificateForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -54,7 +102,21 @@ def create_certificate(request):
     }
     return render(request, "certificate_form.html", context)
 
-def get_certificate_json(request):
+def edit_certificate_data(request, certificate_id): #fungsi edit data sertifikat
+    certificate = Certificate.objects.get(id=certificate_id)
+    form = CertificateForm(request.POST or None, instance=certificate)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Certificate berhasil diupdate!")
+        return redirect("main:show_certificate")
+    context = {
+        "name": "Burhan",
+        "form": form,
+        "certificate": certificate,
+    }
+    return render(request, 'components/edit_certificate.html',context)
+
+def get_certificate_json(request): #fungsi ambil data sertifikat
     title_query = request.GET.get("title", "").strip()
     certificate = Certificate.objects.all()
 
@@ -76,7 +138,7 @@ def delete_certificate(request, certificate_id):
 
     return redirect("main:show_certificate")
 
-def show_book(request):
+def show_book(request): #fungsi halaman utama buku
     title_query = request.GET.get("title", "").strip()
     book_list = Book.objects.all()
     if title_query:
@@ -89,7 +151,7 @@ def show_book(request):
     }
     return render(request, "book.html", context)
 
-def create_book(request):
+def create_book(request): #fungsi tambah buku
     form = BookForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -103,7 +165,7 @@ def create_book(request):
     }
     return render(request, "book_form.html", context)
 
-def delete_book(request, book_id):
+def delete_book(request, book_id): #fungsi haous data buku
     book = get_object_or_404(Book, pk=book_id)
 
     if request.method == "POST":
@@ -113,7 +175,7 @@ def delete_book(request, book_id):
 
     return redirect("main:show_book")
 
-def get_book_json (request):
+def get_book_json (request): #fungsi ambil data buku
     title_query = request.GET.get("title", "").strip()
     book = Book.objects.all()
 
@@ -123,7 +185,7 @@ def get_book_json (request):
     book_json = serializers.serialize("json", book)
     return HttpResponse(book_json, content_type="application/json")
 
-def edit_book_data(request, book_id):
+def edit_book_data(request, book_id): #fungsi edit data buku
     book= Book.objects.get(id=book_id)
     form = BookForm(request.POST or None, instance=book)
     if request.method == "POST" and form.is_valid():

@@ -62,7 +62,23 @@ AI disclosure
 1. Saya memakai Gemini AI Flash untuk meminta saran cara memasukkan img.png kedalam template atau lebih tepatnya bagaimana membuat field yang nantinya bisa menerima file gambar.
 2. Untuk task lainnya saya memakai instruksi yang berasal dari tutorial sebelumnya untuk penambahan endpoint dan template dari uiverse.io untuk card.
 
-----
-# Tugas 3
+---
+
+### Tugas 3
+
+1. Karena dengan memakai form bawaan dari django, kita bisa menghemat waktu produksi karena tidak perlu lagi memikirkan keamanan pengiriman data yang kita buat di dalam form, data akan tehindar dari masalah-msalah umum seperti sql injection atau CORS (tetap harus dihandle oleh beberapa method)---> dibahas dikelas. Keuntungan lainnya adalah kita bisa mempersingkat waktu development karena form django telah menyediakan fungsi-fungsi seperti form date, url, textarea, text input yang membuat validasi otomatis dan kita juga tidak perlu membuat fungsi-fugsi form dari awal. Yang kedua, csrf token berfungsi sebagai "kartu akses (ini dari kelas diterangin kak, pls bukan dari ai :'D)" suatu url agar bisa mengubah data-data di dalam server.
+
+2. Karena JSON memiliki readability yang lebih baik daripada xml, ini terjadi karena pada JSON kita melihat hierarki suatu objek dan juga isi dari key dan value secara simple ('key' : value). Sementara pada xml, syntax yang dipakai lebih menyulitkan untuk dibaca karena memakai syntax <> layaknya html yang mana ini juga berakibat pada proses pemahaman hierarki objek oleh developer. Selain itu, framework saat ini banyak yang banyak menggunakan JSON sebagai format data (ex.MongoDB).
+
+3. alur:
+   -Browser mengirimkan HTTP request ke server (dalam kasus ini get), django mencocokan request dengan path yang ada di urls dan meneruskan nya ke fungsi view yang bersangkutan, fungsi view mengakses data dari database (experience.object.all), django melakukan parse data dari database tersebut dengan `certificate_json = serializers.serialize("json", certificate)`, data yang sudah dalam format JSON dikirimkan ke klien.
+
+- karena JSON menjadi standar pengiriman data saat ini, jika pada kasus lain yang mana front-end bukan berasal dari keluarga python, jika kita mengirimkan request ke API dari framework non-python (ex.React) maka front-end sudah pasti membutuhkan data dalam format universal yaitu JSON, bukan dalam object python.
+
+---
+# AI Disclosure
+1. Dalam project ini saya memakai chat ai GEMINI untuk membantu saya membuat test pada test.py yaitu pada pembuatan test edit, selain itu saya meminta cara agar navbar dari tempalte css uiverse.io tidak mereload ulang posisi navbar ketika browser reload karena berpindah page, ini menghasilkan kode ``` {% if request.resolver_match.url_name == 'show_main' %}checked{% endif %```. ![alt text](image.png).
+2. untuk cara membuat edit page di project ini, saya mengambil refrensi dari video youtube ``` https://youtu.be/_myGxUnoGHY?si=UROz4cRxx_XejHNP``` dan stack overflow (benar, saya akhirnya membuka platform ini lagi).
+
 
 

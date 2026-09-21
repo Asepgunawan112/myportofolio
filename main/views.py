@@ -20,11 +20,20 @@ def show_main(request): #fungsi halaman utama
     }
     return render(request, "index.html", context)
 
+def show_experience(request): #show mamakai json
+    json_response = get_experience_json(request)
 
-def show_experience(request): #fungsi halaman utama pengalaman
+    experience = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    experience = [experience.object for experience in experience] 
+    
+    title_query = request.GET.get("title", "").strip()
     context = {
-        "name": "Ayyasi",
-        "experience_list": Experience.objects.all(),
+        "name": "Ayyasi", 
+        "experience_list": experience,
+        "title_query": title_query,
     }
     return render(request, "experience.html", context)
 
@@ -75,15 +84,19 @@ def delete_experience(request, experience_id): #fungsi hapus data pengalaman
 
     return redirect("main:show_experience")
 
-def show_certificate(request): #fungsi halaman utama sertifikat
-    title_query = request.GET.get("title", "").strip()
-    certificate_list = Certificate.objects.all()
+def show_certificate(request): # show memakai json
+    json_response = get_certificate_json(request)
+
+    certificate = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    certificate = [certificate.object for certificate in certificate] 
     
-    if title_query:
-        certificate_list = certificate_list.filter(title__icontains=title_query)
+    title_query = request.GET.get("title", "").strip()
     context = {
-        "name": "Ayyasi",
-        "certificate_list": certificate_list,
+        "name": "Ayyasi", 
+        "certificate_list": certificate,
         "title_query": title_query,
     }
     return render(request, "certificate.html", context)
@@ -138,15 +151,19 @@ def delete_certificate(request, certificate_id):
 
     return redirect("main:show_certificate")
 
-def show_book(request): #fungsi halaman utama buku
-    title_query = request.GET.get("title", "").strip()
-    book_list = Book.objects.all()
-    if title_query:
-        book_list = book_list.filter(title__icontains=title_query)
+def show_book(request):
+    json_response = get_book_json(request)
 
+    book = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    book = [book.object for book in book] 
+    
+    title_query = request.GET.get("title", "").strip()
     context = {
-        "name": "Ayyasi",
-        "book_list": book_list,
+        "name": "Ayyasi", 
+        "book_list": book,
         "title_query": title_query,
     }
     return render(request, "book.html", context)
@@ -160,7 +177,7 @@ def create_book(request): #fungsi tambah buku
         return redirect("main:show_book")
 
     context = {
-        "name": "Burhan",
+        "name": "Ayyasi",
         "form": form,
     }
     return render(request, "book_form.html", context)

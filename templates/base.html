@@ -19,16 +19,30 @@
       <div class="container">
         <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
         <nav>
-          <a href="{% url 'main:show_main' %}" class="nav-tittle">Profile</a>
-          <a href="{% url 'main:show_experience' %}" class="nav-tittle"
-            >Experience</a
-          >
-          <a href="{% url 'main:show_certificate' %}" class="nav-tittle"
-            >Certificates</a
-          >
-          <a href="{% url 'main:show_book' %}" class="nav-tittle"
-            >Pinjam Buku</a
-          >
+<div class="tab-container">
+  <input type="radio" name="tab" id="tab1" class="tab tab--1" {% if request.resolver_match.url_name == 'show_main' %}checked{% endif %} />
+  <label class="tab_label" for="tab1">
+    <a href="{% url 'main:show_main' %}">Profile</a>
+  </label>
+
+  <input type="radio" name="tab" id="tab2" class="tab tab--2" {% if request.resolver_match.url_name == 'show_experience' %}checked{% endif %} />
+  <label class="tab_label" for="tab2">
+    <a href="{% url 'main:show_experience' %}">Experience</a>
+  </label>
+
+  <input type="radio" name="tab" id="tab3" class="tab tab--3" {% if request.resolver_match.url_name == 'show_certificate' %}checked{% endif %} />
+  <label class="tab_label" for="tab3">
+    <a href="{% url 'main:show_certificate' %}">Certificates</a>
+  </label>
+
+  <input type="radio" name="tab" id="tab4" class="tab tab--4" {% if request.resolver_match.url_name == 'show_book' %}checked{% endif %} />
+  <label class="tab_label" for="tab4">
+    <a href="{% url 'main:show_book' %}">Pinjam Buku</a>
+  </label>
+
+  <div class="indicator"></div>
+</div>
+
         </nav>
       </div>
     </header>

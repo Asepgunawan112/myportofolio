@@ -6,6 +6,7 @@
     <div class="container">
       <p class="section-kicker">Perjalanan saya sejauh ini</p>
       <h1>Experience</h1>
+      {% if user.is_superuser %}
       <a
         href="{% url 'main:create_experience' %}"
         class="button book-add-button"
@@ -13,6 +14,7 @@
         <span aria-hidden="true">+</span>
         Tambah Pengalaman
       </a>
+      {% endif %}
       <p class="section-description">
         Berikut adalah pengalaman saya sejauh ini.
       </p>
@@ -49,6 +51,7 @@
 
           <div class="book-card-actions">
             <div class="book-actions">
+              {% include "components/experience_star.html" with project=project %}
               {% include "components/experience_delete_modal.html" with experience=experience %}
               <a
                 href="{% url 'main:edit_experience_data' experience.id %}"

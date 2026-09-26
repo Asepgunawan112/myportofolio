@@ -1,59 +1,71 @@
-{% extends "base.html" %}
-{% block meta %}
-    <title>Certificate List - {{ name }}</title>
-{% endblock meta %}
-{% block content %}
-    <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <p class="section-kicker">Certificate List</p>
-                <div class="book-header">
-                    <h1>Certificate</h1>
-                    <a href="{% url 'main:create_certificate' %}"
-                       class="button book-add-button">
-                        <span aria-hidden="true">+</span>
-                        Tambah Buku
-                    </a>
-                </div>
-                <form method="get"
-                      action="{% url 'main:show_certificate' %}"
-                      class="book-search">
-                    <input type="search"
-                           name="title"
-                           value="{{ title_query }}"
-                           placeholder="Cari berdasarkan nama sertifikat"
-                           class="book-search__input"
-                           aria-label="Cari berdasarkan nama buku">
-                    <button type="submit" class="button">Cari</button>
-                </form>
-                <div class="experience-grid book-grid">
-                    {% for certificate in certificate_list %}
-                        <article class="experience-card">
-                            {% if certificate.thumbnail %}
-                            <img src="{{ certificate.thumbnail }}"
-                                 alt="Gambar {{ certificate.title }}"
-                                 class="book-image">    
-                            {% endif %}
-                            <h2>{{ certificate.title }}</h2>
-                            <span class="experience-category">{{ certificate.organization }}</span>
-                            <span class="experience-date">{{ certificate.date }}</span>    
-                            <div class="book-card-actions">
-                                <div class="book-actions">
-                                    {% include "components/certificate_delete_modal.html" with certificate=certificate %}
-                                    <a href="{% url 'main:edit_certificate_data' certificate.id %}"
-                                    class="button button-secondary">Edit</a>
-                                </div>
-                            </div>
-                        </article>
-                    {% empty %}
-                        {% if title_query %}
-                            <p class="empty-state">there are no certificate with that name.</p>
-                        {% else %}
-                            <p class="empty-state">there are no certificates to display.</p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+{% extends "base.html" %} {% block meta %}
+<title>Certificate List - {{ name }}</title>
+{% endblock meta %} {% block content %}
+<main>
+  <section class="experience-section" id="experience">
+    <div class="container">
+      <p class="section-kicker">Certificate List</p>
+      <div class="book-header">
+        <h1>Certificate</h1>
+        {% if user.is_superuser %}
+        <a
+          href="{% url 'main:create_certificate' %}"
+          class="button book-add-button"
+        >
+          <span aria-hidden="true">+</span>
+          Tambah Buku
+        </a>
+        {% endif %}
+      </div>
+      <form
+        method="get"
+        action="{% url 'main:show_certificate' %}"
+        class="book-search"
+      >
+        <input
+          type="search"
+          name="title"
+          value="{{ title_query }}"
+          placeholder="Cari berdasarkan nama sertifikat"
+          class="book-search__input"
+          aria-label="Cari berdasarkan nama buku"
+        />
+        <button type="submit" class="button">Cari</button>
+      </form>
+      <div class="experience-grid book-grid">
+        {% for certificate in certificate_list %}
+        <article class="experience-card">
+          {% if certificate.thumbnail %}
+          <img
+            src="{{ certificate.thumbnail }}"
+            alt="Gambar {{ certificate.title }}"
+            class="book-image"
+          />
+          {% endif %}
+          <h2>{{ certificate.title }}</h2>
+          <span class="experience-category"
+            >{{ certificate.organization }}</span
+          >
+          <span class="experience-date">{{ certificate.date }}</span>
+          <div class="book-card-actions">
+            <div class="book-actions">
+              {% include "components/certificate_star.html" with project=project%}
+              {% include "components/certificate_delete_modal.html" with certificate=certificate %}
+              <a
+                href="{% url 'main:edit_certificate_data' certificate.id %}"
+                class="button button-secondary"
+                >Edit</a
+              >
             </div>
-        </section>
-    </main>
+          </div>
+        </article>
+        {% empty %} {% if title_query %}
+        <p class="empty-state">there are no certificate with that name.</p>
+        {% else %}
+        <p class="empty-state">there are no certificates to display.</p>
+        {% endif %} {% endfor %}
+      </div>
+    </div>
+  </section>
+</main>
 {% endblock content %}

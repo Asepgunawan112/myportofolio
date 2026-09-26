@@ -1,6 +1,7 @@
 # Create your models here.
 import uuid
 from django.db import models
+from django.contrib.auth.models import User
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
@@ -19,6 +20,8 @@ class Experience(models.Model):
     thumbnail = models.URLField(blank=True, null=True)
     started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(blank=True, null=True)
+    starred_by = models.ManyToManyField(User, related_name='starred_experiences', blank=True)
+
     def __str__(self):
         return self.title
     
@@ -32,6 +35,8 @@ class Certificate(models.Model):
     organization= models.CharField(max_length=255, blank=True)
     date= models.DateField(blank=True)
     thumbnail = models.URLField(blank=True, max_length=500, null=True)
+    starred_by = models.ManyToManyField(User, related_name='starred_certificates', blank=True)
+
 
     def __str__(self):
         return self.title
@@ -44,6 +49,8 @@ class Book(models.Model):
     sinopsis = models.TextField(blank=True)
     thumbnail = models.URLField(blank=True, max_length=500)
     status = models.CharField(max_length=20, choices=[('available', 'Available'), ('borrowed', 'Borrowed'), ('not allowed', 'Not Allowed')], default='to-read')
+    starred_by = models.ManyToManyField(User, related_name='starred_books', blank=True)
+
 
     def __str__(self):
         return self.title

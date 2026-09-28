@@ -969,19 +969,14 @@ pembatas */
 
 .tab-container {
   position: relative;
-
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-
   padding: 2px;
-
   background-color: #dadadb;
   border-radius: 9px;
+  width: max-content;
 }
 
 .indicator {
-  content: "";
   width: 130px;
   height: 28px;
   background: #ffffff;
@@ -994,7 +989,7 @@ pembatas */
     0px 3px 8px rgba(0, 0, 0, 0.12),
     0px 3px 1px rgba(0, 0, 0, 0.04);
   border-radius: 7px;
-  transition: all 0.2s ease-out;
+  transition: left 0.25s ease-out;
 }
 
 .tab {
@@ -1004,44 +999,46 @@ pembatas */
   z-index: 99;
   outline: none;
   opacity: 0;
+  pointer-events: none;
 }
 
 .tab_label {
   width: 130px;
   height: 28px;
-
   position: relative;
   z-index: 999;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border: 0;
-
   font-size: 0.75rem;
   opacity: 0.6;
-
   cursor: pointer;
 }
 
 .tab--1:checked ~ .indicator {
-  left: 2px;
+  left: calc(130px * 0 + 2px);
 }
-
 .tab--2:checked ~ .indicator {
-  left: calc(130px + 2px);
+  left: calc(130px * 1 + 2px);
 }
-
 .tab--3:checked ~ .indicator {
   left: calc(130px * 2 + 2px);
 }
-
 .tab--4:checked ~ .indicator {
   left: calc(130px * 3 + 2px);
 }
 .tab--5:checked ~ .indicator {
   left: calc(130px * 4 + 2px);
+}
+.tab--6:checked ~ .indicator {
+  left: calc(130px * 5 + 2px);
+}
+.tab--7:checked ~ .indicator {
+  left: calc(130px * 6 + 2px);
+}
+.tab--8:checked ~ .indicator {
+  left: calc(130px * 7 + 2px);
 }
 .tab_label a {
   display: flex;

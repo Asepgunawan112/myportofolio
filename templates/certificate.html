@@ -52,7 +52,7 @@
               {% if user.is_authenticated %}
                 {% include "components/certificate_star.html" with project=certificate %}
               {% endif %}
-              {% if user.is_staff or user.is_superuser or perms.main.change_certificate %}
+              {% if user.is_superuser or perms.main.change_certificate %}
                 <a href="{% url 'main:edit_certificate_data' certificate.id %}" class="button button-secondary">Edit</a>
               {% endif %}
               {% if user.is_superuser %}

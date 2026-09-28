@@ -22,135 +22,61 @@
     <header class="site-header">
       <div class="container">
         <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-        <nav>
-          <div class="tab-container">
-            <input
-              type="radio"
-              name="tab"
-              id="tab1"
-              class="tab tab--1"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_main"
-              %}checked{%
-              endif
-              %}
-            />
-            <label class="tab_label" for="tab1">
-              <a href="{% url 'main:show_main' %}">Profile</a>
-            </label>
+    <nav>
+  {% with current=request.resolver_match.url_name %}
+  <div class="tab-container">
+    <input type="radio" name="tab" id="tab1" class="tab tab--1"
+      {% if current == "show_main" %}checked{% endif %} />
+    <label class="tab_label" for="tab1">
+      <a href="{% url 'main:show_main' %}">Profile</a>
+    </label>
 
-            <input
-              type="radio"
-              name="tab"
-              id="tab2"
-              class="tab tab--2"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_experience"
-              %}checked{%
-              endif
-              %}
-            />
-            <label class="tab_label" for="tab2">
-              <a href="{% url 'main:show_experience' %}">Experience</a>
-            </label>
+    <input type="radio" name="tab" id="tab2" class="tab tab--2"
+      {% if current == "show_experience" %}checked{% endif %} />
+    <label class="tab_label" for="tab2">
+      <a href="{% url 'main:show_experience' %}">Experience</a>
+    </label>
 
-            <input
-              type="radio"
-              name="tab"
-              id="tab3"
-              class="tab tab--3"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_certificate"
-              %}checked{%
-              endif
-              %}
-            />
-            <label class="tab_label" for="tab3">
-              <a href="{% url 'main:show_certificate' %}">Certificates</a>
-            </label>
+    <input type="radio" name="tab" id="tab3" class="tab tab--3"
+      {% if current == "show_certificate" %}checked{% endif %} />
+    <label class="tab_label" for="tab3">
+      <a href="{% url 'main:show_certificate' %}">Certificates</a>
+    </label>
 
-            <input
-              type="radio"
-              name="tab"
-              id="tab4"
-              class="tab tab--4"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_book"
-              %}checked{%
-              endif
-              %}
-            />
-            <label class="tab_label" for="tab6">
-              <a href="{% url 'main:show_book' %}">Pinjam Buku</a>
-            </label>
-            {% if user.is_authenticated %}
+    <input type="radio" name="tab" id="tab4" class="tab tab--4"
+      {% if current == "show_book" %}checked{% endif %} />
+    <label class="tab_label" for="tab4">
+      <a href="{% url 'main:show_book' %}">Pinjam Buku</a>
+    </label>
 
-            <input
-              type="radio"
-              name="tab"
-              id="tab6"
-              class="tab tab--6"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_book"
-              %}checked{%
-              endif
-              %}
-            />
+    {% if user.is_authenticated %}
+    <input type="radio" name="tab" id="tab5" class="tab tab--5" />
+    <label class="tab_label" for="tab5">
+      <a href="{% url 'main:logout' %}">Logout</a>
+    </label>
 
-            <label class="tab_label" for="tab5">
-              <a href="{% url 'main:logout' %}">Logout</a>
-            </label>
-            <span class="nav-user">{{ user.username }}</span>
+    <input type="radio" name="tab" id="tab6" class="tab tab--6" />
+    <label class="tab_label" for="tab6">
+      <span class="nav-user">{{ user.username }}</span>
+    </label>
+    {% else %}
+    <input type="radio" name="tab" id="tab5" class="tab tab--5"
+      {% if current == "register" %}checked{% endif %} />
+    <label class="tab_label" for="tab5">
+      <a href="{% url 'main:register' %}">Register</a>
+    </label>
 
-            {% else %}
-            <input
-              type="radio"
-              name="tab"
-              id="tab5"
-              class="tab tab--5"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_book"
-              %}checked{%
-              endif
-              %}
-            />
-            <label class="tab_label" for="tab7">
-              <a href="{% url 'main:register' %}">Register</a>
-            </label>
-            <input
-              type="radio"
-              name="tab"
-              id="tab5"
-              class="tab tab--7"
-              {%
-              if
-              request.resolver_match.url_name=""
-              ="show_book"
-              %}checked{%
-              endif
-              %}
-            />
+    <input type="radio" name="tab" id="tab6" class="tab tab--6"
+      {% if current == "login" %}checked{% endif %} />
+    <label class="tab_label" for="tab6">
+      <a href="{% url 'main:login' %}">Login</a>
+    </label>
+    {% endif %}
 
-            <label class="tab_label" for="tab7">
-              <a href="{% url 'main:login' %}">Login</a>
-            </label>
-            {% endif %}
-
-            <div class="indicator"></div>
-          </div>
-        </nav>
+    <div class="indicator"></div>
+  </div>
+  {% endwith %}
+</nav>
       </div>
     </header>
     {% block content %} {% endblock content %}

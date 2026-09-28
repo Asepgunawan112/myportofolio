@@ -48,7 +48,7 @@
               {% if user.is_authenticated %}
                 {% include "components/book_star.html" with project=book %}
               {% endif %}
-              {% if user.is_staff or user.is_superuser or perms.main.change_experience %}
+              {% if user.is_superuser or perms.main.change_experience %}
                 <a href="{% url 'main:edit_book_data' book.id %}" class="button button-secondary">Edit</a>
               {% endif %}
               {% if user.is_superuser %}

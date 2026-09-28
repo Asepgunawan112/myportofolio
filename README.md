@@ -76,9 +76,22 @@ AI disclosure
 - karena JSON menjadi standar pengiriman data saat ini, jika pada kasus lain yang mana front-end bukan berasal dari keluarga python, jika kita mengirimkan request ke API dari framework non-python (ex.React) maka front-end sudah pasti membutuhkan data dalam format universal yaitu JSON, bukan dalam object python.
 
 ---
+
 # AI Disclosure
-1. Dalam project ini saya memakai chat ai GEMINI untuk membantu saya membuat test pada test.py yaitu pada pembuatan test edit, selain itu saya meminta cara agar navbar dari tempalte css uiverse.io tidak mereload ulang posisi navbar ketika browser reload karena berpindah page, ini menghasilkan kode ``` {% if request.resolver_match.url_name == 'show_main' %}checked{% endif %```. ![alt text](image.png).
-2. untuk cara membuat edit page di project ini, saya mengambil refrensi dari video youtube ``` https://youtu.be/_myGxUnoGHY?si=UROz4cRxx_XejHNP``` dan stack overflow (benar, saya akhirnya membuka platform ini lagi).
 
+1. Dalam project ini saya memakai chat ai GEMINI untuk membantu saya membuat test pada test.py yaitu pada pembuatan test edit, selain itu saya meminta cara agar navbar dari tempalte css uiverse.io tidak mereload ulang posisi navbar ketika browser reload karena berpindah page, ini menghasilkan kode ` {% if request.resolver_match.url_name == 'show_main' %}checked{% endif %`. ![alt text](image.png).
+2. untuk cara membuat edit page di project ini, saya mengambil refrensi dari video youtube ` https://youtu.be/_myGxUnoGHY?si=UROz4cRxx_XejHNP` dan stack overflow (benar, saya akhirnya membuka platform ini lagi).
 
+---
 
+### Tugas 4
+
+- AI Discolsure
+
+* Di tugas kali ini saya menggunakan AI untuk membantu penggunaan syntax pada permission accesss di html untuk access editor (syntax untuk mengatur agar editor hanya memunculkan tombol edit di tampilannya). Ini saya lakukan karena pada django forum, syntax yang saya temukan agak berbeda. LINK : '''https://forum.djangoproject.com/t/allow-staff-users-to-use-django-admin-to-manage-users-only-for-specific-group/9194/2'''
+
+* Link refrensi grouping user untuk editor : '''https://youtu.be/IF_ZpCiZKkw?si=K-S0cW3HiMh6WN_p'''
+* Refrensi untuk fitur grouping dan required condition yang saya pakai = `https://forum.djangoproject.com/t/allow-staff-users-to-use-django-admin-to-manage-users-only-for-specific-group/9194/2 , https://docs.djangoproject.com/en/6.1/topics/auth/default/#the-login-required-decorator`
+* Refrensi untuk superuser : '''https://youtu.be/LRNk6LLDUII?si=1KYsuGO9PD4PCcHO''' dan disini saya juga meminta ai untuk memvalidasi langkah saya.
+
+---

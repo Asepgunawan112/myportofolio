@@ -49,13 +49,15 @@
           <span class="experience-date">{{ certificate.date }}</span>
           <div class="book-card-actions">
             <div class="book-actions">
-              {% include "components/certificate_star.html" with project=project%}
-              {% include "components/certificate_delete_modal.html" with certificate=certificate %}
-              <a
-                href="{% url 'main:edit_certificate_data' certificate.id %}"
-                class="button button-secondary"
-                >Edit</a
-              >
+              {% if user.is_authenticated %}
+                {% include "components/certificate_star.html" with project=certificate %}
+              {% endif %}
+              {% if user.is_staff or user.is_superuser or perms.main.change_certificate %}
+                <a href="{% url 'main:edit_certificate_data' certificate.id %}" class="button button-secondary">Edit</a>
+              {% endif %}
+              {% if user.is_superuser %}
+                {% include "components/certificate_delete_modal.html" with certificate=certificate %}
+              {% endif %}
             </div>
           </div>
         </article>

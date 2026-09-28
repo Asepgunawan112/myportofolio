@@ -46,6 +46,8 @@ def show_experience(request): #show mamakai json
     return render(request, "experience.html", context)
 
 def edit_experience_data(request, experience_id): #fungsi edit data pengalaman
+    if not request.user.has_perm('main.change_experience') and not request.user.is_superuser:
+        raise PermissionDenied
     experience = Experience.objects.get(id=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
     if request.method == "POST" and form.is_valid():
@@ -136,6 +138,8 @@ def create_certificate(request): #fungsi tambah sertifikat
     return render(request, "certificate_form.html", context)
 
 def edit_certificate_data(request, certificate_id): #fungsi edit data sertifikat
+    if not request.user.has_perm('main.change_certificate') and not request.user.is_superuser:
+        raise PermissionDenied
     certificate = Certificate.objects.get(id=certificate_id)
     form = CertificateForm(request.POST or None, instance=certificate)
     if request.method == "POST" and form.is_valid():
@@ -156,7 +160,7 @@ def get_certificate_json(request): #fungsi ambil data sertifikat
     if title_query:
         certificate = certificate.filter(title__icontains=title_query)
 
-    certificate_json = serializers.serialize("json", certificate)
+    certificate_json = serializers.serialize("json", certificate, use_natural_foreign_keys=True)
     return HttpResponse(certificate_json, content_type="application/json")
     # sudah test di postman dan berhasil (yeyy)
 
@@ -235,6 +239,8 @@ def get_book_json (request): #fungsi ambil data buku
     return HttpResponse(book_json, content_type="application/json")
 
 def edit_book_data(request, book_id): #fungsi edit data buku
+    if not request.user.has_perm('main.change_book') and not request.user.is_superuser:
+        raise PermissionDenied
     book= Book.objects.get(id=book_id)
     form = BookForm(request.POST or None, instance=book)
     if request.method == "POST" and form.is_valid():
@@ -242,7 +248,7 @@ def edit_book_data(request, book_id): #fungsi edit data buku
         messages.success(request, "Book berhasil diupdate!")
         return redirect("main:show_book")
     context = {
-        "name": "Burhan",
+        "name": "Ayyasi",
         "form": form,
         "book": book,
     }

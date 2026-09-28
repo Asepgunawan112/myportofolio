@@ -11,13 +11,14 @@ load_dotenv()
 
 USER_PASSWORD = os.getenv("E2E_USER_PASSWORD")
 ADMIN_PASSWORD = os.getenv("E2E_ADMIN_PASSWORD")
+EDITOR_PASSWORD = os.getenv("E2E_EDITOR_PASSWORD")
 
-if not USER_PASSWORD or not ADMIN_PASSWORD:
-    sys.exit("E2E_USER_PASSWORD dan E2E_ADMIN_PASSWORD belum diisi di berkas .env.")
+if not USER_PASSWORD or not ADMIN_PASSWORD or not EDITOR_PASSWORD:
+    sys.exit("E2E_USER_PASSWORD, E2E_ADMIN_PASSWORD, dan E2E_EDITOR_PASSWORD belum diisi di berkas .env.")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "portofolio.settings")
 django.setup()
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 
 def setup_users():
@@ -32,6 +33,15 @@ def setup_users():
     admin.is_superuser = True
     admin.is_staff = True
     admin.save()
+
+    editor, _ = User.objects.get_or_create(username="editor_test")
+    editor.set_password(EDITOR_PASSWORD) 
+    editor.is_superuser = False
+    editor.is_staff = True
+    editor.save()
+
+    editor_group, _ = Group.objects.get_or_create(name="Editor")
+    editor.groups.add(editor_group)
 
 
 def main():
@@ -77,6 +87,20 @@ def main():
         driver.get(f"{base_url}/projects/add/")
         assert "403" in driver.title or "Forbidden" in driver.page_source
         print("[PASS] Otorisasi user biasa dibatasi (403)")
+
+        # 4. Cek pembatasan akses user Editor ke form tambah proyek (disini saya memakai bantuan AI gemini)
+        driver.get(f"{base_url}/logout/")
+        wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/login/')]")))
+        
+        driver.get(f"{base_url}/login/")
+        wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys("editor_test")
+        driver.find_element(By.NAME, "password").send_keys(EDITOR_PASSWORD) 
+        driver.find_element(By.XPATH, "//button[@type='submit']").click()
+        wait.until(EC.url_to_be(f"{base_url}/"))
+        
+        driver.get(f"{base_url}/projects/add/")
+        assert "403" in driver.title or "Forbidden" in driver.page_source
+        print("[PASS] Otorisasi user Editor dibatasi dari fitur tambah data (403)")
 
         # 4. Cek akses superuser ke form tambah proyek
         driver.get(f"{base_url}/logout/")

@@ -151,3 +151,5 @@ MAILERS = {
 }
 
 CSRF_TRUSTED_ORIGINS = ["https://ayyasi-myportofolio.pws.cs.ui.ac.id/"]
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 1800

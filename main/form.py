@@ -100,6 +100,29 @@ class BookForm(ModelForm):
                 }
             ),
         }
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Judul buku tidak boleh hanya berisi tag HTML.")
+        return title
+
+    def clean_author(self):
+        return strip_tags(self.cleaned_data["author"]).strip()
+
+    def clean_year(self):
+        year = strip_tags(self.cleaned_data["year"]).strip()
+        if not year:
+            raise ValidationError("Tahun terbit tidak boleh hanya berisi tag HTML.")
+        return year
+
+    def clean_sinopsis(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
+
+    def clean_thumbnail(self):
+        return strip_tags(self.cleaned_data["thumbnail"]).strip()
+
+    def clean_status(self):
+        return strip_tags(self.cleaned_data["status"]).strip()
 
 
 

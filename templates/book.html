@@ -6,64 +6,286 @@
     <div class="container">
       <p class="section-kicker">Book List</p>
       <div class="book-header">
+        <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Daftar buku berhasil dimuat dengan baik!', 'success')">
+    Test Toast Notifikasi
+</button>
         <h1>Book</h1>
         {% if user.is_superuser %}
-        <a href="{% url 'main:create_book' %}" class="button book-add-button">
-          <span aria-hidden="true">+</span>
-          Tambah Buku
-        </a>
+            {% include "components/book_form_modal.html" %}
+        <button type="button"
+        class="button book-add-button"
+        popovertarget="add-book-modal">
+    <span aria-hidden="true">+</span>
+    Tambah buku
+</button>
         {% endif %}
       </div>
-      <form
-        method="get"
-        action="{% url 'main:show_book' %}"
-        class="book-search"
-      >
-        <input
-          type="search"
-          name="title"
-          value="{{ title_query }}"
-          placeholder="Cari berdasarkan nama buku"
-          class="book-search__input"
-          aria-label="Cari berdasarkan nama buku"
-        />
-        <button type="submit" class="button">Cari</button>
+   <form id="book-search-form" class="book-search">
+                    <input type="search"
+                           id="search-input"
+                           name="title"
+                           value="{{ title_query }}"
+                           placeholder="Cari berdasarkan nama buku"
+                           class="book-search__input"
+                           aria-label="Cari berdasarkan nama buku">
+                    <button type="submit" class="button">Cari</button>
       </form>
-      <div class="experience-grid book-grid">
-        {% for book in book_list %}
-        <article class="experience-card">
-          {% if book.thumbnail %}
-          <img
-            src="{{ book.thumbnail }}"
-            alt="Gambar {{ book.title }}"
-            class="book-image"
-          />
-          {% endif %}
-          <h2>{{ book.title }}</h2>
-          <span class="experience-category">{{ book.author }}</span>
-          <p class="experience-description">{{ book.sinopsis }}</p>
-          <span class="experience-date">{{ book.year }}</span>
-    <div class="book-card-actions">
-            <div class="book-actions">
-              {% if user.is_authenticated %}
-                {% include "components/book_star.html" with project=book %}
-              {% endif %}
-              {% if user.is_superuser or perms.main.change_experience %}
-                <a href="{% url 'main:edit_book_data' book.id %}" class="button button-secondary">Edit</a>
-              {% endif %}
-              {% if user.is_superuser %}
-                {% include "components/book_delete_modal.html" with book=book %}
-              {% endif %}
+      <!-- Loading State -->
+                <div id="loading" class="empty-state hide">
+                    <p>Memuat buku...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error" class="empty-state hide">
+                    <p>Gagal memuat data buku. Silakan coba lagi.</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="empty-state hide">
+                    <p>Belum ada buku yang ditambahkan atau ditemukan.</p>
+                </div>
+
+                <!-- Buku Grid -->
+                <div id="grid" class="experience-grid book-grid hide"></div>
             </div>
-          </div>
-        </article>
-        {% empty %} {% if title_query %}
-        <p class="empty-state">Tidak ada buku dengan nama tersebut.</p>
-        {% else %}
-        <p class="empty-state">Belum ada buku yang ditambahkan.</p>
-        {% endif %} {% endfor %}
-      </div>
-    </div>
   </section>
 </main>
+
+    <script>
+    // Konfigurasi
+    const BASE_BOOK_ENDPOINT = "{% url 'main:get_book_json' %}";
+    const CREATE_BOOK_ENDPOINT = "{% url 'main:create_book_ajax' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let bookAbortController;
+    let searchDebounceTimer;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('book-search-form');
+    const searchInput = document.getElementById('search-input');
+    const bookForm = document.getElementById('book-form');
+
+    function closeBookModal() {
+        const modal = document.getElementById("add-book-modal");
+        if (modal && typeof modal.hidePopover === 'function') {
+            modal.hidePopover();
+        }
+    }
+    // Alias for compatibility
+    function closebookModal() {
+        closeBookModal();
+    }
+
+    // Membaca nilai cookie, digunakan untuk mengambil token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Mengirim data form ke server via AJAX
+    async function addbook(event) {
+        event.preventDefault();
+
+        const submitButton = bookForm.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_BOOK_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(bookForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                bookForm.reset();
+                closeBookModal();
+                showToast('Berhasil', 'Buku baru berhasil ditambahkan!', 'success');
+                fetchBook(searchInput ? searchInput.value.trim() : "");
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                showToast('Gagal menambahkan buku', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding book:', error);
+            showToast('Gagal menambahkan buku', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
+    }
+
+    if (bookForm) {
+        bookForm.addEventListener('submit', addbook);
+    }
+
+    function searchbook() {
+        fetchBook(searchInput ? searchInput.value.trim() : "");
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(function() {
+                searchbook();
+            }, SEARCH_DEBOUNCE_DELAY);
+        });
+    }
+
+    if (searchForm) {
+        searchForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            clearTimeout(searchDebounceTimer);
+            searchbook();
+        });
+    }
+
+    // Menyembunyikan/Menampilkan section halaman
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    // Mengubah karakter khusus HTML menjadi entity agar ditampilkan sebagai teks
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // Membuat elemen card buku
+    function buildBookCardElement(item) {
+        const book = item.fields;
+        const bookId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'experience-card';
+
+        const imageHtml = book.thumbnail
+            ? `<img src="${escapeHtml(book.thumbnail)}" alt="Gambar ${escapeHtml(book.title)}" class="book-image">`
+            : '';
+
+        const urlHtml = book.book_url 
+            ? `<a href="${escapeHtml(book.book_url)}" class="button">Lihat Buku</a>`
+            : '';
+
+        // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
+        const deleteUrl = "{% url 'main:delete_book' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', bookId);
+        const editUrl = "{% url 'main:edit_book_data' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', bookId);
+        const starUrl = "{% url 'main:toggle_star_book' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', bookId);
+
+        const editHtml = IS_SUPERUSER
+            ? `<a href="${escapeHtml(editUrl)}" class="button button-secondary">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER 
+            ? `<form method="post" action="${escapeHtml(deleteUrl)}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger" onclick="return confirm('Yakin ingin menghapus buku ini?');">Hapus</button>
+            </form>`
+            : '';
+
+        const isStarredClass = book.is_starred ? " is-starred" : "";
+        const starText = book.is_starred ? "Unstar" : "Star";
+        const starredNames = Array.isArray(book.starred_by_names)
+            ? book.starred_by_names.join(', ')
+            : (book.starred_by_names || '');
+        const starTitle = book.star_count > 0 
+            ? `Dibintangi oleh ${escapeHtml(starredNames)}` 
+            : "Jadilah yang pertama memberi star";  
+
+        // Komponen card
+        const completeCardHtml = `
+            ${imageHtml}
+            <h2>${escapeHtml(book.title)}</h2>
+            ${book.author ? `<h3>${escapeHtml(book.author)}</h3>` : ''}
+            ${book.year ? `<span class="experience-category">${escapeHtml(book.year)}</span>` : ''}
+            ${book.sinopsis ? `<p class="experience-description">${escapeHtml(book.sinopsis)}</p>` : ''}
+            ${book.status ? `<p class="experience-status">${escapeHtml(book.status)}</p>` : ''}
+            <div class="book-card-actions">
+                <div class="book-actions">
+                    ${urlHtml}
+                    
+                    <form method="post" action="${escapeHtml(starUrl)}" class="star-form">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="button button-star${isStarredClass}"
+                                title="${escapeHtml(starTitle)}">
+                            <span aria-hidden="true">★</span>
+                            ${starText}
+                            <span class="star-count">${escapeHtml(book.star_count)}</span>
+                        </button>
+                    </form>
+
+                    ${editHtml}
+                    ${deleteHtml}
+                </div>
+            </div>
+        `;
+
+        articleElement.innerHTML = completeCardHtml;
+        return articleElement;
+    }
+
+    // Fetch data book
+    async function fetchBook(searchQuery = "") {
+        if (bookAbortController) bookAbortController.abort();
+        bookAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+            
+            const url = searchQuery ? `${BASE_BOOK_ENDPOINT}?title=${encodeURIComponent(searchQuery)}` : BASE_BOOK_ENDPOINT;
+            
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: bookAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const bookData = await response.json();
+
+            if (bookData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                bookData.forEach(item => {
+                    gridContainer.appendChild(buildBookCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading book:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Start application
+    fetchBook(searchInput ? searchInput.value.trim() : "");
+    </script>
 {% endblock content %}

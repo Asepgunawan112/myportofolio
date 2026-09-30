@@ -8,7 +8,8 @@ from main.form import CertificateForm, BookForm, ExperienceForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required  
-from django.core.exceptions import PermissionDenied        
+from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse       
 import datetime
 
 
@@ -180,19 +181,16 @@ def delete_certificate(request, certificate_id):
     return redirect("main:show_certificate")
 
 def show_book(request):
-    json_response = get_book_json(request)
-
-    book = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    book = [book.object for book in book] 
-    
     title_query = request.GET.get("title", "").strip()
+
+    books = Book.objects.prefetch_related('starred_by').all()
+    if title_query:
+        books = books.filter(title__icontains=title_query)
     context = {
         "name": "Ayyasi", 
-        "book_list": book,
         "title_query": title_query,
+        "books": books,
+        "form": BookForm(),
     }
     return render(request, "book.html", context)
 
@@ -228,15 +226,35 @@ def delete_book(request, book_id): #fungsi haous data buku
 
     return redirect("main:show_book")
 
-def get_book_json (request): #fungsi ambil data buku
+def get_book_json(request):
     title_query = request.GET.get("title", "").strip()
-    book = Book.objects.all()
+    books = Book.objects.prefetch_related('starred_by').all()
 
     if title_query:
-        book = book.filter(title__icontains=title_query)
+        books = books.filter(title__icontains=title_query)
 
-    book_json = serializers.serialize("json", book,  use_natural_foreign_keys=True)
-    return HttpResponse(book_json, content_type="application/json")
+    # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
+    data = []
+    for book in books:
+        starred_users = book.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(book.id),
+            "fields": {
+                "title": book.title,
+                "author": book.author,
+                "year": book.year,
+                "sinopsis": book.sinopsis,
+                "thumbnail": book.thumbnail,
+                "status": book.status,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+    return JsonResponse(data, safe=False)
 
 def edit_book_data(request, book_id): #fungsi edit data buku
     if not request.user.has_perm('main.change_book') and not request.user.is_superuser:
@@ -333,3 +351,26 @@ def toggle_star_certificate(request, certificate_id):
             certificate.starred_by.add(request.user)
 
     return redirect("main:show_certificate")
+
+
+from django.views.decorators.http import require_POST
+
+...
+
+@require_POST
+def create_book_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan buku."},
+            status=403,
+        )
+
+    form = BookForm(request.POST)
+    if form.is_valid():
+        book = form.save()
+        return JsonResponse(
+            {"message": "Buku berhasil ditambahkan.", "pk": str(book.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)

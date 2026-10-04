@@ -94,6 +94,41 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "certificate.html")
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
 
+    def test_certificate_json_returns_all_data(self):
+        second_certificate = Certificate.objects.create(
+            title="Sertifikat Django",
+            organization="Django Course",
+            date="2026-07-20",
+        )
+
+        response = self.client.get(reverse("main:get_certificate_json"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {item["pk"] for item in response.json()},
+            {str(self.certificate.id), str(second_certificate.id)},
+        )
+        certificate_data = next(
+            item for item in response.json() if item["pk"] == str(self.certificate.id)
+        )
+        self.assertEqual(certificate_data["fields"]["date"], "2026-06-20")
+
+    def test_certificate_json_search_filters_by_title(self):
+        Certificate.objects.create(
+            title="Sertifikat Django",
+            organization="Django Course",
+            date="2026-07-20",
+        )
+
+        response = self.client.get(
+            reverse("main:get_certificate_json"),
+            {"title": "react"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["fields"]["title"], self.certificate.title)
+
     def test_certificate_data_displayed_when_data_added(self):
         response = self.client.get(reverse("main:show_certificate"))
 

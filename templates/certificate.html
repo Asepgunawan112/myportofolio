@@ -5,69 +5,290 @@
   <section class="experience-section" id="experience">
     <div class="container">
       <p class="section-kicker">Certificate List</p>
-      <div class="book-header">
+      <div class="certificate">
+        <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Project berhasil dimuat dengan baik!', 'success')">Test Toast Notifikasi</button>
         <h1>Certificate</h1>
         {% if user.is_superuser %}
-        <a
-          href="{% url 'main:create_certificate' %}"
-          class="button book-add-button"
-        >
-          <span aria-hidden="true">+</span>
-          Tambah Buku
-        </a>
+            {% include "components/certificate_form_modal.html" %}
+        <button type="button"
+        class="button certificate-add-button"
+        popovertarget="add-certificate-modal">
+    <span aria-hidden="true">+</span>
+    Tambah sertifikat
+</button>
         {% endif %}
       </div>
-      <form
-        method="get"
-        action="{% url 'main:show_certificate' %}"
-        class="book-search"
-      >
-        <input
-          type="search"
-          name="title"
-          value="{{ title_query }}"
-          placeholder="Cari berdasarkan nama sertifikat"
-          class="book-search__input"
-          aria-label="Cari berdasarkan nama buku"
-        />
-        <button type="submit" class="button">Cari</button>
+      <form id="certificate-search-form" class="certificate-search">
+                    <input type="search"
+                           id="search-input"
+                           name="title"
+                           value="{{ title_query }}"
+                           placeholder="Cari berdasarkan nama sertifikat"
+                           class="certificate-search__input"
+                           aria-label="Cari berdasarkan nama sertifikat">
+                    <button type="submit" class="button">Cari</button>
       </form>
-      <div class="experience-grid book-grid">
-        {% for certificate in certificate_list %}
-        <article class="experience-card">
-          {% if certificate.thumbnail %}
-          <img
-            src="{{ certificate.thumbnail }}"
-            alt="Gambar {{ certificate.title }}"
-            class="book-image"
-          />
-          {% endif %}
-          <h2>{{ certificate.title }}</h2>
-          <span class="experience-category"
-            >{{ certificate.organization }}</span
-          >
-          <span class="experience-date">{{ certificate.date }}</span>
-          <div class="book-card-actions">
-            <div class="book-actions">
-              {% if user.is_authenticated %}
-                {% include "components/certificate_star.html" with project=certificate %}
-              {% endif %}
-              {% if user.is_superuser or perms.main.change_certificate %}
-                <a href="{% url 'main:edit_certificate_data' certificate.id %}" class="button button-secondary">Edit</a>
-              {% endif %}
-              {% if user.is_superuser %}
-                {% include "components/certificate_delete_modal.html" with certificate=certificate %}
-              {% endif %}
+      <!-- Loading State -->
+                <div id="loading" class="empty-state hide">
+                    <p>Memuat sertifikat...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error" class="empty-state hide">
+                    <p>Gagal memuat data sertifikat. Silakan coba lagi.</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="empty-state hide">
+                    <p>Belum ada sertifikat yang ditambahkan atau ditemukan.</p>
+                </div>
+
+                <!-- Certificate Grid -->
+                <div id="grid" class="certificate-grid hide"></div>
             </div>
-          </div>
-        </article>
-        {% empty %} {% if title_query %}
-        <p class="empty-state">there are no certificate with that name.</p>
-        {% else %}
-        <p class="empty-state">there are no certificates to display.</p>
-        {% endif %} {% endfor %}
-      </div>
-    </div>
   </section>
 </main>
+
+ <script>
+    // Konfigurasi
+    const BASE_CERTIFICATE_ENDPOINT = "{% url 'main:get_certificate_json' %}";
+    const CREATE_CERTIFICATE_ENDPOINT = "{% url 'main:create_certificate_ajax' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let certificateAbortController;
+    let searchDebounceTimer;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('certificate-search-form');
+    const searchInput = document.getElementById('search-input');
+    const certificateForm = document.getElementById('certificate-form');
+
+    function closeCertificateModal() {
+        const modal = document.getElementById("add-certificate-modal");
+        if (modal && typeof modal.hidePopover === 'function') {
+            modal.hidePopover();
+        }
+    }
+    // Alias for compatibility
+    function closecertificateModal() {
+        closeCertificateModal();
+    }
+
+    // Membaca nilai cookie, digunakan untuk mengambil token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Mengirim data form ke server via AJAX
+    async function addcertificate(event) {
+        event.preventDefault();
+
+        const submitButton = certificateForm.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_CERTIFICATE_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(certificateForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                certificateForm.reset();
+                closeCertificateModal();
+                showToast('Berhasil', 'Sertifikat baru berhasil ditambahkan!', 'success');
+                fetchcertificate(searchInput ? searchInput.value.trim() : "");
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                showToast('Gagal menambahkan certificate', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding certificate:', error);
+            showToast('Gagal menambahkan certificate', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
+    }
+
+    if (certificateForm) {
+        certificateForm.addEventListener('submit', addcertificate);
+    }
+
+    function searchcertificate() {
+        fetchcertificate(searchInput ? searchInput.value.trim() : "");
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(function() {
+                searchcertificate();
+            }, SEARCH_DEBOUNCE_DELAY);
+        });
+    }
+
+    if (searchForm) {
+        searchForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            clearTimeout(searchDebounceTimer);
+            searchcertificate();
+        });
+    }
+
+    // Menyembunyikan/Menampilkan section halaman
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    // Mengubah karakter khusus HTML menjadi entity agar ditampilkan sebagai teks
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // Membuat elemen card sertifikat (flip-card custom design)
+    function buildCertificateCardElement(item) {
+        const certificate = item.fields;
+        const certificateId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'experience-card';
+
+        const imageHtml = certificate.thumbnail
+            ? `<img src="${escapeHtml(certificate.thumbnail)}" alt="Gambar ${escapeHtml(certificate.title)}" class="certificate-image">`
+            : '';
+
+        const urlHtml = certificate.certificate_url 
+            ? `<a href="${escapeHtml(certificate.certificate_url)}" class="button">Lihat Sertifikat</a>`
+            : '';
+
+        // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
+        const deleteUrl = "{% url 'main:delete_certificate' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', certificateId);
+        const editUrl = "{% url 'main:edit_certificate_data' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', certificateId);
+        const starUrl = "{% url 'main:toggle_star_certificate' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', certificateId);
+
+        const editHtml = IS_SUPERUSER
+            ? `<a href="${escapeHtml(editUrl)}" class="button button-secondary">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER 
+            ? `<form method="post" action="${escapeHtml(deleteUrl)}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger" onclick="return confirm('Yakin ingin menghapus sertifikat ini?');">Hapus</button>
+            </form>`
+            : '';
+
+        const isStarredClass = certificate.is_starred ? " is-starred" : "";
+        const starText = certificate.is_starred ? "Unstar" : "Star";
+        const starredNames = Array.isArray(certificate.starred_by_names)
+            ? certificate.starred_by_names.join(', ')
+            : (certificate.starred_by_name || certificate.starred_by_names || '');
+        const starTitle = certificate.star_count > 0 
+            ? `Dibintangi oleh ${escapeHtml(starredNames)}` 
+            : "Jadilah yang pertama memberi star";  
+
+        const backStyle = certificate.thumbnail
+            ? `style="background-image: url('${escapeHtml(certificate.thumbnail)}');"`
+            : '';
+
+        // Komponen card menggunakan desain flip-card milik user
+        const completeCardHtml = `
+            <div class="flip-card">
+                ${editHtml}
+                ${deleteHtml}
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <p class="title">${escapeHtml(certificate.title)}</p>
+                        ${certificate.organization ? `<p class="organization">${escapeHtml(certificate.organization)}</p>` : ''}
+                        ${certificate.date ? `<p class="certificate-date" id="certificate-date">${escapeHtml(certificate.date)}</p>` : ''}
+                    </div>
+                    <div class="flip-card-back" ${backStyle}>
+                        ${!certificate.thumbnail ? `<p style="padding: 1rem; color: #fff;">Tidak ada gambar</p>` : ''}
+                    </div>
+                </div>
+            </div>
+            <div class="certificate-actions">
+                <form method="post" action="${escapeHtml(starUrl)}" class="star-form">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="button button-star${isStarredClass}"
+                            title="${escapeHtml(starTitle)}">
+                        <span aria-hidden="true">★</span>
+                        ${starText}
+                        <span class="star-count">${escapeHtml(certificate.star_count)}</span>
+                    </button>
+                </form>
+            </div>
+        `;
+
+        articleElement.innerHTML = completeCardHtml;
+        return articleElement;
+    }
+
+    // Fetch data certificate
+    async function fetchcertificate(searchQuery = "") {
+        if (certificateAbortController) certificateAbortController.abort();
+        certificateAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+            
+            const url = searchQuery ? `${BASE_CERTIFICATE_ENDPOINT}?title=${encodeURIComponent(searchQuery)}` : BASE_CERTIFICATE_ENDPOINT;
+            
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: certificateAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const certificateData = await response.json();
+
+            if (certificateData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                certificateData.forEach(item => {
+                    gridContainer.appendChild(buildCertificateCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading certificate:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Start application
+    fetchcertificate(searchInput ? searchInput.value.trim() : "");
+    </script>
 {% endblock content %}

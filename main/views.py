@@ -10,6 +10,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required  
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse       
+from django.views.decorators.http import require_POST
 import datetime
 
 
@@ -28,21 +29,16 @@ def show_main(request): #fungsi halaman utama
     }
     return render(request, "index.html", context)
 
-def show_experience(request): #show mamakai json
-    json_response = get_experience_json(request)
-
-    experience = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"), 
-        use_natural_foreign_keys=True
-    )
-    experience = [experience.object for experience in experience] 
-    
+def show_experience(request): # show memakai json
     title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.all()
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
     context = {
         "name": "Ayyasi", 
-        "experience_list": experience,
         "title_query": title_query,
+        "experiences": experiences,
+        "form": ExperienceForm(),
     }
     return render(request, "experience.html", context)
 
@@ -75,19 +71,62 @@ def create_experience(request): #fungsi tambah pengalaman
         experience.save()
         messages.success(request, "Pengalaman baru berhasil ditambahkan!")
         return redirect("main:show_experience")
-    
-
     context = {
         "name": "Ayyasi",
         "form" : form,
     }
     return render(request, "experience_form.html", context)
 
+@login_required(login_url="/login/")
+@require_POST
+def create_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan pengalaman."},
+            status=403,
+        )
 
-def get_experience_json(request): #fungsi ambil data pengalaman
-    experience = Experience.objects.all()
-    experience_json = serializers.serialize("json", experience,  use_natural_foreign_keys=True)
-    return HttpResponse(experience_json, content_type="application/json")
+    form = ExperienceForm(request.POST)
+    if form.is_valid():
+        experience = form.save()
+        return JsonResponse(
+            {"message": "experience berhasil ditambahkan.", "pk": str(experience.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+    
+
+
+def get_experience_json(request): #fungsi ambil data experience json
+    title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.prefetch_related('starred_by').all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
+
+    # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
+    data = []
+    for experience in experiences:
+        starred_users = experience.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_name = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "category": experience.category,
+                "thumbnail": experience .thumbnail,
+                "started_at": experience.started_at,
+                "ended_at": experience.ended_at,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_name": starred_by_name,
+            }
+        })
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="/login/")
 def delete_experience(request, experience_id): #fungsi hapus data pengalaman
@@ -104,19 +143,15 @@ def delete_experience(request, experience_id): #fungsi hapus data pengalaman
     return redirect("main:show_experience")
 
 def show_certificate(request): # show memakai json
-    json_response = get_certificate_json(request)
-
-    certificate = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    certificate = [certificate.object for certificate in certificate] 
-    
     title_query = request.GET.get("title", "").strip()
+    certificates = Certificate.objects.prefetch_related('starred_by').all()
+    if title_query:
+        certificates = certificates.filter(title__icontains=title_query)
     context = {
         "name": "Ayyasi", 
-        "certificate_list": certificate,
         "title_query": title_query,
+        "certificates": certificates,
+        "form": CertificateForm(),
     }
     return render(request, "certificate.html", context)
 
@@ -138,6 +173,26 @@ def create_certificate(request): #fungsi tambah sertifikat
     }
     return render(request, "certificate_form.html", context)
 
+
+@login_required(login_url="/login/")
+@require_POST
+def create_certificate_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan sertifikat."},
+            status=403,
+        )
+
+    form = CertificateForm(request.POST)
+    if form.is_valid():
+        certificate = form.save()
+        return JsonResponse(
+            {"message": "Sertifikat berhasil ditambahkan.", "pk": str(certificate.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
 def edit_certificate_data(request, certificate_id): #fungsi edit data sertifikat
     if not request.user.has_perm('main.change_certificate') and not request.user.is_superuser:
         raise PermissionDenied
@@ -156,13 +211,31 @@ def edit_certificate_data(request, certificate_id): #fungsi edit data sertifikat
 
 def get_certificate_json(request): #fungsi ambil data sertifikat
     title_query = request.GET.get("title", "").strip()
-    certificate = Certificate.objects.all()
+    certificates = Certificate.objects.prefetch_related('starred_by').all()
 
     if title_query:
-        certificate = certificate.filter(title__icontains=title_query)
+        certificates = certificates.filter(title__icontains=title_query)
 
-    certificate_json = serializers.serialize("json", certificate, use_natural_foreign_keys=True)
-    return HttpResponse(certificate_json, content_type="application/json")
+    # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
+    data = []
+    for certificate in certificates:
+        starred_users = certificate.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_name = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(certificate.id),
+            "fields": {
+                "title": certificate.title,
+                "organization": certificate.organization,
+                "date": certificate.date,
+                "thumbnail": certificate.thumbnail,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_name": starred_by_name,
+            }
+        })
+    return JsonResponse(data, safe=False)
     # sudah test di postman dan berhasil (yeyy)
 
 @login_required(login_url="/login/")
@@ -351,11 +424,6 @@ def toggle_star_certificate(request, certificate_id):
             certificate.starred_by.add(request.user)
 
     return redirect("main:show_certificate")
-
-
-from django.views.decorators.http import require_POST
-
-...
 
 @require_POST
 def create_book_ajax(request):

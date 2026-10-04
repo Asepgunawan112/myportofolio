@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse       
 from django.views.decorators.http import require_POST
+from django.utils.html import strip_tags
 import datetime
 
 

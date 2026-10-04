@@ -95,3 +95,24 @@ AI disclosure
 * Refrensi untuk superuser : '''https://youtu.be/LRNk6LLDUII?si=1KYsuGO9PD4PCcHO''' dan disini saya juga meminta ai untuk memvalidasi langkah saya.
 
 ---
+
+### Tugas 5
+
+---
+
+1. Fungsi debounce berguna untuk mengatasi server agar tidak melakukan proses berat terus-menerus dalam waktu yang berdekatan (yang mana akan membuat server bekerja terlalu berat). Contoh penerapan pada project ini ada pada proses get oleh ajax yang mana dipakai di fitur search. Pada fitur search, dipakai teknik debounce yang mana setelah pengguna selesai mengetik, lalu 300 milidetik selanjutnya ajax baru akan mengrimkan http request get ke server. Tanpa teknik debounce, ajax akan melakukan request terus menerus setiap pengguna mengetik huruf baru. Jadim debounce menunggu dulu sampai pengguna berhenti mengetik selama 300 milidetik, barulah setelahnya memberikan request.
+2. Jadi, await itu berhubungan dengan async. Proses ini bisa digambarkan seperti "Tunggu saya fetch dulu (async), jika sudah beres baru lakukan instruksi selanjutnya(await)". Jadi, tanpa await, maka instruksi akan terganggu karena belum tentu fetch berhasil terpanggil, tetapi instruksi selanjutnya sudah dijalankan(ini akan menimbulkan fetch menghasilkan promise yang tidak terhandle).
+3. Serangan XSS adalah serangan dimana ada sebuah serangan dimana seseorang memasukkan suatu script/code ke dalam form website sehingga membuat front-end menerima dan memproses script tersebut sehingga membuat website mengalami serangan-serangan tertentu (mengakses session pengguna lain atau menganggu tampilan web yang ada). Alasan mengapa template django lebih aman akan serangan ini karena form dan templating pada django sudah memuat validasi mereka sendiri yang sudah termasuk kedalam django nya sehingga memuat fitur auto-escape secara otomatis. Sementara pada AJAX, validasi atau pengecekan data harus dibuat sendiri oleh developer karena tidak memiliki fitur bawaan tersebut, sehingga membuat ajax lebih rentan terhadpat serangan XSS ini.
+
+---
+
+- Sumber
+
+1. '''https://youtu.be/E9XcoEMu1lk?si=7ylNjHA2-IxFj20H'''
+2. YT WPU, Tutorial JS lanjutan
+
+# AI Disclosure
+
+1. Saya menggunakan AI untuk melakukan penyesuaian pada card css di page certificate agar lebih rapih.
+
+---

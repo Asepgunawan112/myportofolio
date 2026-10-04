@@ -171,20 +171,16 @@
             .replaceAll("'", '&#39;');
     }
 
-    // Membuat elemen card sertifikat (flip-card custom design)
+    // Membuat elemen card sertifikat =====
     function buildCertificateCardElement(item) {
         const certificate = item.fields;
         const certificateId = item.pk;
 
         const articleElement = document.createElement('article');
-        articleElement.className = 'experience-card';
+        articleElement.className = 'experience-card certificate-card';
 
         const imageHtml = certificate.thumbnail
             ? `<img src="${escapeHtml(certificate.thumbnail)}" alt="Gambar ${escapeHtml(certificate.title)}" class="certificate-image">`
-            : '';
-
-        const urlHtml = certificate.certificate_url 
-            ? `<a href="${escapeHtml(certificate.certificate_url)}" class="button">Lihat Sertifikat</a>`
             : '';
 
         // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
@@ -215,37 +211,26 @@
             ? `Dibintangi oleh ${escapeHtml(starredNames)}` 
             : "Jadilah yang pertama memberi star";  
 
-        const backStyle = certificate.thumbnail
-            ? `style="background-image: url('${escapeHtml(certificate.thumbnail)}');"`
-            : '';
-
-        // Komponen card menggunakan desain flip-card milik user
         const completeCardHtml = `
-            <div class="flip-card">
+            ${imageHtml}
+            <h2>${escapeHtml(certificate.title)}</h2>
+            ${certificate.organization ? `<h3>${escapeHtml(certificate.organization)}</h3>` : ''}
+            ${certificate.date ? `<p class="experience-date">${escapeHtml(certificate.date)}</p>` : ''}
+            <div class="book-card-actions">
+                <div class="book-actions">
                 ${editHtml}
                 ${deleteHtml}
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <p class="title">${escapeHtml(certificate.title)}</p>
-                        ${certificate.organization ? `<p class="organization">${escapeHtml(certificate.organization)}</p>` : ''}
-                        ${certificate.date ? `<p class="certificate-date" id="certificate-date">${escapeHtml(certificate.date)}</p>` : ''}
-                    </div>
-                    <div class="flip-card-back" ${backStyle}>
-                        ${!certificate.thumbnail ? `<p style="padding: 1rem; color: #fff;">Tidak ada gambar</p>` : ''}
-                    </div>
+                    <form method="post" action="${escapeHtml(starUrl)}" class="star-form">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="button button-star${isStarredClass}"
+                                title="${escapeHtml(starTitle)}">
+                            <span aria-hidden="true">★</span>
+                            ${starText}
+                            <span class="star-count">${escapeHtml(certificate.star_count)}</span>
+                        </button>
+                    </form>
                 </div>
-            </div>
-            <div class="certificate-actions">
-                <form method="post" action="${escapeHtml(starUrl)}" class="star-form">
-                    {% csrf_token %}
-                    <button type="submit" 
-                            class="button button-star${isStarredClass}"
-                            title="${escapeHtml(starTitle)}">
-                        <span aria-hidden="true">★</span>
-                        ${starText}
-                        <span class="star-count">${escapeHtml(certificate.star_count)}</span>
-                    </button>
-                </form>
             </div>
         `;
 

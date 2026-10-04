@@ -1,6 +1,8 @@
 from django.forms import ModelForm, TextInput, Textarea, URLInput, DateInput, NumberInput, Select
 
 from main.models import Certificate, Book, Experience
+from django.utils.html import strip_tags
+from django.core.exceptions import ValidationError
 
 class CertificateForm(ModelForm):
     class Meta:
@@ -42,6 +44,23 @@ class CertificateForm(ModelForm):
                 }
             ),
         }
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Judul sertifikat tidak boleh hanya berisi tag HTML.")
+        return title
+
+    def clean_organization(self):
+        return strip_tags(self.cleaned_data["organization"]).strip()
+
+    def clean_date(self):
+        date = strip_tags(self.cleaned_data["date"]).strip()
+        if not date:
+            raise ValidationError("Tanggal rilis tidak boleh hanya berisi tag HTML.")
+        return date
+   
+    def clean_thumbnail(self):
+        return strip_tags(self.cleaned_data["thumbnail"]).strip()
 
 class BookForm(ModelForm):
     class Meta:
@@ -164,3 +183,25 @@ class ExperienceForm(ModelForm):
                 }
             ),
         }
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Judul pengalaman tidak boleh hanya berisi tag HTML.")
+        return title
+
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
+
+    def clean_started_at(self):
+        date = strip_tags(self.cleaned_data["started_at"]).strip()
+        if not date:
+            raise ValidationError("Tanggal mulai tidak boleh hanya berisi tag HTML.")
+        return date
+
+    def clean_ended_at(self):
+        date = strip_tags(self.cleaned_data["ended_at"]).strip()
+        if not date:
+            raise ValidationError("Tanggal selesai tidak boleh hanya berisi tag HTML.")
+        return date
+    def clean_category(self):
+        return strip_tags(self.cleaned_data["category"]).strip()

@@ -7,13 +7,15 @@
       <p class="section-kicker">Perjalanan saya sejauh ini</p>
       <h1>Experience</h1>
       {% if user.is_superuser %}
-      <a
-        href="{% url 'main:create_experience' %}"
-        class="button book-add-button"
-      >
+      {% include "components/experience_form_modal.html" %}
+            <button
+                type="button"
+                class="button book-add-button"
+                popovertarget="add-experience-modal"
+            >
         <span aria-hidden="true">+</span>
         Tambah Pengalaman
-      </a>
+            </button>
       {% endif %}
       <p class="section-description">
         Berikut adalah pengalaman saya sejauh ini.

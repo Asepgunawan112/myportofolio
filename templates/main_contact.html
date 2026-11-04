@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contacts</title>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"></script>
+  </head>
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <h1>Daftar Kontak</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Number</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="contact-rows">
+        {% include "contact_rows.html" %}
+      </tbody>
+    </table>
+    <h1>Tambah Kontak</h1>
+    <form
+      hx-post="{% url 'main:add_contact' %}"
+      hx-target="#contact-rows"
+      hx-swap="innerHTML"
+      HX-on::after-request="if (event.detail.success) this.reset()"
+    >
+      {% csrf_token %}
+      <div>
+        <label for="name">Nama:</label>
+        <input type="text" id="name" name="name" placeholder="Nama" required />
+      </div>
+
+      <div>
+        <label for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Email"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="number">Nomor:</label>
+        <input
+          type="text"
+          id="number"
+          name="number"
+          placeholder="Nomor Telepon"
+          required
+        />
+      </div>
+
+      <button type="submit">Tambah</button>
+    </form>
+  </body>
+</html>

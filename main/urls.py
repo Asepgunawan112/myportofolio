@@ -1,6 +1,6 @@
 from django.urls import path
 
-from main.views import show_main, show_experience, show_certificate, create_certificate, get_certificate_json, delete_certificate, show_book, create_book, delete_book, get_book_json, edit_book_data, edit_certificate_data, create_experience, edit_experience_data, delete_experience, get_experience_json, get_certificate_json, register, login_user, logout_user, toggle_star_book, toggle_star_experience, toggle_star_certificate, create_book_ajax, create_certificate_ajax, create_experience_ajax
+from main.views import show_main, show_experience, show_certificate, create_certificate, get_certificate_json, delete_certificate, show_book, create_book, delete_book, get_book_json, edit_book_data, edit_certificate_data, create_experience, edit_experience_data, delete_experience, get_experience_json, get_certificate_json, register, login_user, logout_user, toggle_star_book, toggle_star_experience, toggle_star_certificate, create_book_ajax, create_certificate_ajax, create_experience_ajax, contact_list, add_contact, delete_contact
 
 app_name = "main"
 
@@ -30,4 +30,7 @@ urlpatterns = [
     path("book/add-ajax/", create_book_ajax, name="create_book_ajax"),
     path("certificate/add-ajax/", create_certificate_ajax, name="create_certificate_ajax"),
     path("experience/add-ajax/", create_experience_ajax, name="create_experience_ajax"),
+    path("contact/", contact_list, name="contact_list"),
+    path("contact/add/", add_contact, name="add_contact"),
+    path("contacts/<int:pk>/delete/", delete_contact, name="delete_contact"),
 ]       

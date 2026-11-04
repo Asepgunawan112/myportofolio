@@ -54,3 +54,13 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+class Contact(models.Model):
+    name= models.CharField(max_length=255)
+    email= models.EmailField(max_length=255)
+    number= models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name

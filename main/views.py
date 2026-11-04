@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from main.models import Experience, Certificate, Book
+from main.models import Experience, Certificate, Book, Contact
 from django.contrib import messages
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from main.form import CertificateForm, BookForm, ExperienceForm
 from django.contrib.auth import login, logout
@@ -10,7 +10,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required  
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse       
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.utils.html import strip_tags
 import datetime
 
@@ -443,3 +443,26 @@ def create_book_ajax(request):
         )
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+def contact_list(request):
+    contacts= Contact.objects.all()
+    return render(request, "main_contact.html", {"contacts": contacts})
+
+def add_contact(request):
+    if request.method == "POST":
+        Contact.objects.create(
+            name=request.POST.get("name"),
+            email=request.POST.get("email"),
+            number=request.POST.get("number"),
+        )
+
+    contacts= Contact.objects.all()
+    return render(request, "main_contact.html", {"contacts": contacts})
+
+@require_http_methods(["DELETE"])
+def delete_contact(request, pk):
+    contact= get_object_or_404(Contact, pk=pk)
+    contact.delete()
+    return httpResponse("")
+

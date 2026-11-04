@@ -114,5 +114,6 @@ AI disclosure
 # AI Disclosure
 
 1. Saya menggunakan AI untuk melakukan penyesuaian pada card css di page certificate agar lebih rapih.
+2. Saya menggunakan AI untuk memberi contoh dalam pembuatan test.py
 
 ---

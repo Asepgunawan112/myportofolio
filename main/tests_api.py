@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from main.models import Book
+from main.models import Book, Certificate, Experience
 
 
 class BookAPITest(APITestCase):
@@ -92,11 +92,12 @@ class BookAPITest(APITestCase):
         self.assertEqual(self.client.post(self.star_url).status_code, status.HTTP_403_FORBIDDEN)
         self.client.force_authenticate(user=self.visitor)
         response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["is_starred"])
         self.assertEqual(response.data["star_count"], 1)
         response = self.client.post(self.star_url)
-        self.assertFalse(response.data["is_starred"])
-        self.assertEqual(response.data["star_count"], 0)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")
 
     def test_computed_fields_are_read_only(self):
         self.client.force_authenticate(user=self.owner)
@@ -147,3 +148,203 @@ class BookAPITest(APITestCase):
             self.list_url, self.payload, format="json", HTTP_X_CSRFTOKEN=token,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class CertificateAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_superuser(
+            username="certificate-owner", email="certificate-owner@example.com",
+        )
+        self.visitor = User.objects.create_user(username="certificate-visitor")
+        self.certificate = Certificate.objects.create(
+            title="Django Certificate", organization="Django Course",
+            date="2026-06-20", thumbnail="https://example.com/certificate.jpg",
+        )
+        self.list_url = reverse("api:certificate-list")
+        self.detail_url = reverse("api:certificate-detail", args=[self.certificate.id])
+        self.star_url = reverse("api:certificate-star", args=[self.certificate.id])
+        self.payload = {
+            "title": "New Certificate", "organization": "Python Course",
+            "date": "2026-07-20", "thumbnail": "https://example.com/new-certificate.jpg",
+        }
+
+    def test_public_list_and_detail(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["id"], str(self.certificate.id))
+        self.assertFalse(response.data[0]["is_starred"])
+        self.assertNotIn("fields", response.data[0])
+        self.assertEqual(self.client.get(self.detail_url).status_code, status.HTTP_200_OK)
+
+    def test_search_and_missing_certificate(self):
+        response = self.client.get(self.list_url, {"title": "DJANGO"})
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            self.client.get(self.list_url, {"title": "not-found"}).data, [],
+        )
+        missing_url = reverse("api:certificate-detail", args=[uuid.uuid4()])
+        self.assertEqual(
+            self.client.get(missing_url).status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_guest_and_visitor_cannot_write(self):
+        for user in (None, self.visitor):
+            self.client.force_authenticate(user=user)
+            self.assertEqual(
+                self.client.post(self.list_url, self.payload, format="json").status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+            self.assertEqual(
+                self.client.patch(self.detail_url, {"title": "Changed"}, format="json").status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+            self.assertEqual(
+                self.client.delete(self.detail_url).status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+
+    def test_owner_can_create_and_validation_is_applied(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Certificate.objects.filter(pk=response.data["id"]).exists())
+        for changes, field in [
+            ({"title": "   "}, "title"),
+            ({"title": '<img src="x" onerror="alert(1)">'}, "title"),
+        ]:
+            response = self.client.post(
+                self.list_url, {**self.payload, **changes}, format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(field, response.data)
+
+    def test_patch_put_and_delete(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(
+            self.detail_url, {"title": "Changed"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.certificate.refresh_from_db()
+        self.assertEqual(self.certificate.title, "Changed")
+        response = self.client.put(self.detail_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")
+        self.assertFalse(Certificate.objects.filter(pk=self.certificate.id).exists())
+
+    def test_star_returns_200_then_204(self):
+        self.assertEqual(
+            self.client.post(self.star_url).status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+        self.client.force_authenticate(user=self.visitor)
+        response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 1)
+        response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")
+
+
+class ExperienceAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_superuser(
+            username="experience-owner", email="experience-owner@example.com",
+        )
+        self.visitor = User.objects.create_user(username="experience-visitor")
+        self.experience = Experience.objects.create(
+            title="Django Developer", description="Built portfolio APIs.",
+            category="full-time", started_at="2026-01-01T00:00:00Z",
+        )
+        self.list_url = reverse("api:experience-list")
+        self.detail_url = reverse("api:experience-detail", args=[self.experience.id])
+        self.star_url = reverse("api:experience-star", args=[self.experience.id])
+        self.payload = {
+            "title": "New Experience", "description": "Created a web application.",
+            "category": "freelance", "thumbnail": "https://example.com/experience.jpg",
+            "started_at": "2026-02-01T00:00:00Z", "ended_at": "2026-06-01T00:00:00Z",
+        }
+
+    def test_public_list_and_detail(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["id"], str(self.experience.id))
+        self.assertTrue(response.data[0]["is_ongoing"])
+        self.assertFalse(response.data[0]["is_starred"])
+        self.assertNotIn("fields", response.data[0])
+        self.assertEqual(self.client.get(self.detail_url).status_code, status.HTTP_200_OK)
+
+    def test_search_and_missing_experience(self):
+        response = self.client.get(self.list_url, {"title": "DEVELOPER"})
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            self.client.get(self.list_url, {"title": "not-found"}).data, [],
+        )
+        missing_url = reverse("api:experience-detail", args=[uuid.uuid4()])
+        self.assertEqual(
+            self.client.get(missing_url).status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_guest_and_visitor_cannot_write(self):
+        for user in (None, self.visitor):
+            self.client.force_authenticate(user=user)
+            self.assertEqual(
+                self.client.post(self.list_url, self.payload, format="json").status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+            self.assertEqual(
+                self.client.patch(self.detail_url, {"title": "Changed"}, format="json").status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+            self.assertEqual(
+                self.client.delete(self.detail_url).status_code,
+                status.HTTP_403_FORBIDDEN,
+            )
+
+    def test_owner_can_create_and_validation_is_applied(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Experience.objects.filter(pk=response.data["id"]).exists())
+        for changes, field in [
+            ({"title": "   "}, "title"),
+            ({"title": '<img src="x" onerror="alert(1)">'}, "title"),
+        ]:
+            response = self.client.post(
+                self.list_url, {**self.payload, **changes}, format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(field, response.data)
+
+    def test_patch_put_and_delete(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(
+            self.detail_url, {"title": "Changed"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.experience.refresh_from_db()
+        self.assertEqual(self.experience.title, "Changed")
+        response = self.client.put(self.detail_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")
+        self.assertFalse(Experience.objects.filter(pk=self.experience.id).exists())
+
+    def test_star_returns_200_then_204(self):
+        self.assertEqual(
+            self.client.post(self.star_url).status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+        self.client.force_authenticate(user=self.visitor)
+        response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 1)
+        response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")

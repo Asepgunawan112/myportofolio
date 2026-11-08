@@ -117,3 +117,26 @@ AI disclosure
 2. Saya menggunakan AI untuk memberi contoh dalam pembuatan test.py
 
 ---
+
+# Tugas 6
+
+---
+
+1. Karena ada gagasan lain dalam REST selain komunikasi melalui JSON, yaitu data diperlakukan sebagai resource (sehingga URL murni menunjuk pada data), http method tidak dituliskan di dalam URL melainkan dikirimkan dari client ke server dengan mengubahnya menjadi request, lalu barulah server mengembalikan response berupa JSON. Jadi, pertukaran data dengan JSON saja belum cukup untuk disebut REST. Perbedaan put dan patch adalah dari cara kerjanya. Walaupun keduanya sama-sama mengedit (atau memperbarui) data, tetapi teknisnya berbeda. Ketika melakukan PUT, data baru akan menimpa semua data lama. Jadi jika suatu data memperoleh http method PUT, walaupun yang diubah hanya 1 atribut, tetapi dalam balik layar sebenarnya semua atribut tersebut ditimpa/diperbarui dengan data baru. Berbeda dengan PATCH, PATCH hanya mengedit/memperbarui atribut yang ingin diganti saja tanpa mengusik atribut lainnya dalam data.
+
+2. Peran serializer DRF Django adalah untuk menerjemahkan data raw object di server menjadi format JSON yang siap dikirim melalui response dan juga deserialize yaitu menerjemahkan lagi JSON menjadi object python. Keuntungan dari serializer ini adalah kita bisa memakai validasi bawaan django dan juga membuat validator sendiri, sehingga akan lebih mempercepat produksi dan juga fleksibel. Selain itu, serializer memetakan seluruh atribut model secara otomatis, sehingga kita tidak perlu menulis kode dictionary (context pada views biasa).
+
+3. Autentikasi-> proses untuk server mengenali user agar bisa mengenali jenis user dan user permission di website. Disini jugs proses login dilakukan yang mana akan menentukan masuk ke akun mana user.
+   Authorisasi-> logika akses user, dimana user akan dibagi akses-aksesnya di dalam website berdasakan jenis usernya, apakah user merupakan superuser, editor, atau user biasa. Disini akan diatur http method apa yang bisa dilakukan oleh user yang login (misal semua method pada superuser, get saja untuk reguler user, PUT/PATCH dan get untuk editor). hak akses harus diproteksi/validasi oleh server dan harus melalui permission karena ini merupakan upaya keamanan dari server. Dalam proses ini, hak akses benar-benar diatur untuk menentukan hak autorisasi yang cocok untuk pengguna. Sementara itu, menyembunyikan tombol di template (atau yang django buat hidden) itu hanyalah proses menyembunyikan ui atau tampilannya saja sementara alur kerjanya masih berjalan di balik layar. Jadi jika pengguna melakukan manipulasi html di inspect element browser untuk memunculkan tombol/form yang dibuat hidden atau menggunakan API testing seperti POSTMAN, pengguna tetap dapat memunculkan atau menggunakan hak akses yang disembunyikan tersebut karena fitur tersebut hanya disembunyikan secara tampilannya saja.
+
+4. Karena ketika program memakai session Authentication, browser mengirimkan cookie session di browser milik pengguna yang mana hal tersebut bisa digunakan untuk mengakses authentikasi yang nantinya menuju ke hak autorisiasi pengguna. CSRF token tetap dibutuhkan di tahap ini karena session cookie tersebut bisa dimanfaatkan oleh pihak lain ketika user mendapat serangan dari website lain yang sedang dibuka secara bersamaan (CSRF attack), tanpa csrf token, webiste tidak dapat mengenali apakah session key yang sedang login saat ini merupakan token yang berasal dari website kita atau tidak dan membuat website berbahaya tadi dapat menyerang website kita. Test yang memakai force_authenticate tidak cukup untuk menguji csrf karena force_authenticate hanya mensimulasikan test dengan membuat seolah user sudah login yang mana hanya menguji autorisasi atau hak akses user saja. Jadi, proses-proses validasi login tidak dilakukan yang mana hal tersebut menjadi sebuah kekurangan.
+
+---
+
+# AI DISCLOSURE
+
+1. Pada tugas ini, proses refactoring saya lakukan dengan melakukan hal serupa yang dicontohkan oleh tutorial 07, beberapa fungsi khusunya untuk fitur terakhir yang saya refactor saya meminta ai copilot untuk membuatnya karena prosesnya akan sangat repetitif. Oleh karena itu, saya memakainya untuk mempersingkat waktu.
+2. Test case saya memakai diskusi ai untuk berdiskusi apakah test sudah sesuai atau tidak.
+3. Copilot juga digunakan untuk refacotring script js yang melalui proses repetitif (sudah dikerjakan manual lalu untuk fitur terakhir digunakan ai karena proses refactoring nya sama saja dengan yang sebelumnya).
+
+---

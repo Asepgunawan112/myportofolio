@@ -16,7 +16,7 @@ import os
 from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "ayyasi-myportofolio.pws.cs.ui.ac.id"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "ayyasi-myportofolio.pws.cs.ui.ac.id",  "127.0.0.1", "10.0.2.2"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
     'main',
 ]
 
@@ -55,7 +57,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+       "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    "django.middleware.common.CommonMiddleware",
 ]
+
+REST_FRAMEWORK={
+    "DEFAULT_AUTHENTICATION_CLASSES":[
+
+    ],
+}
+
 
 ROOT_URLCONF = 'portofolio.urls'
 
@@ -81,6 +94,7 @@ WSGI_APPLICATION = 'portofolio.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 # Database configuration
+CORS_ALLOW_ALL_ORIGINS = not PRODUCTION
 if PRODUCTION:
     DATABASES = {
         'default': {
@@ -151,6 +165,7 @@ MAILERS = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ["https://ayyasi-myportofolio.pws.cs.ui.ac.id/"]
+CSRF_TRUSTED_ORIGINS = ["https://ayyasi-myportofolio.pws.cs.ui.ac.id/", 'http://localhost:8000',
+    'http://127.0.0.1:8000',]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800

@@ -14,6 +14,7 @@ from main.serializers import (
 )
 
 
+
 @api_view(["GET", "HEAD", "POST"])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
@@ -202,3 +203,17 @@ def experience_star(request, experience_id):
         experience, context={"request": request},
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    if request.auth is not None:
+        request.auth.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # TODO: Delete request.auth if it is not None, then return HTTP 204 No Content
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+"""curl -X GET http://localhost:8000/api/v1/certificate/ \
+  -H "Authorization: Token f3b0ae095d292f61fdd5e1ebde07431cfc55c046"
+"""

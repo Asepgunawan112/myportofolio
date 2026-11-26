@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',    
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -57,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
        "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -172,7 +172,7 @@ MAILERS = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ["https://ayyasi-myportofolio.pws.cs.ui.ac.id/", 'http://localhost:8000',
+CSRF_TRUSTED_ORIGINS = ["https://ayyasi-myportofolio.pws.cs.ui.ac.id", 'http://localhost:8000',
     'http://127.0.0.1:8000',]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800

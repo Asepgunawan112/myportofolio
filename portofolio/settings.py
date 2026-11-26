@@ -96,6 +96,12 @@ WSGI_APPLICATION = 'portofolio.wsgi.application'
 # Database configuration
 CORS_ALLOW_ALL_ORIGINS = not PRODUCTION
 if PRODUCTION:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
+if PRODUCTION:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
